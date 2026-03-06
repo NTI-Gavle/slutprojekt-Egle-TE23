@@ -1,7 +1,18 @@
+/*Colors*/
+:root {
+    --bg-gradient: linear-gradient(135deg, #edfcff, #00bfff);
+    --primary-color:  #d6f6ff;
+    --secondary-color:#00bfff;
+    --text-main-color: #00bfff;
+    --text-secondary-color: #fff;
+    --accent-color: #ffea00;
+    --post-color: #000000;
+}
+
 /* Header */
 .site-header {
-    background-color: #333;
-    color: #fff;
+    background-color: var(--primary-color);
+    color: var(--text-main-color);
     padding: 15px 0;
 }
 
@@ -14,7 +25,7 @@
 }
 
 .site-title a {
-    color: #fff;
+    color: var(--text-main-color);
     text-decoration: none;
     font-size: 1.5em;
 }
@@ -29,7 +40,7 @@
 }
 
 .site-nav a {
-    color: #fff;
+    color: #00bfff;
     text-decoration: none;
 }
 
