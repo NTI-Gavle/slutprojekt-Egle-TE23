@@ -4,33 +4,83 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="feed-container">
-<section class="feed-nav">
+<nav class="feed-nav">
     <ul>
         <li><a href="" class="btn btn-primary">&ltfollowing&gt</a></li>
         <li><a href="" class="btn btn-primary">&ltnew&gt</a></li>
         <li><a href="" class="btn btn-primary">&lttop&gt</a></li>
         <li><a href="" class="btn btn-primary">&ltdiscover&gt</a></li>
     </ul>
-  
+</nav>
 
-</section>
-<div id="feed">
+<div class="feed">
     <h1>&ltdiscorver&gt</h1>
     <div class="post-feed">
         <div class="post-container">
             <div class="post-header">
-                <span>Username</span>
+                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
+                <span class="post-username">Username</span>
             </div>
             <div class="post-content">
                 <p>post text</p>
-                <img src="" alt="img">
+                <img src="Images\placeholder_2.jpg" alt="img">
+                <img src="Images\placeholder_3.png" alt="img">
+
             </div>
-            <div class="post-button-conatiner">
-                <btn class="btn btn-icon">Like</btn>
-                <btn class="btn btn-icon">Dislike</btn>
-                <btn class="btn btn-icon">Comment</btn>                      
-                <btn class="btn btn-icon">Star</btn>
-                <btn class="btn btn-icon">Send</btn>
+            <div class="post-button-container">
+                <div>
+                    <btn class="btn btn-icon">Like</btn>
+                    <btn class="btn btn-icon">Dislike</btn>
+                    <btn class="btn btn-icon">Comment</btn>  
+                </div>
+                <div>
+                    <btn class="btn btn-icon">Star</btn>
+                    <btn class="btn btn-icon">Send</btn>
+                </div>  
+            </div>
+        </div>
+        <div class="post-container">
+            <div class="post-header">
+                <img src="Images\placeholder_1.png" alt="profile picture" class="post-profile-pic">
+                <span class="post-username">Username</span>
+            </div>
+            <div class="post-content">
+                <p>Wow i sure am enjoying this image letly. thought id share it with everyone and yeah. Well i guess theres a lot to be said about it but i relly just cant think of the words. it really is crazy how cool it is</p>
+                <img src="Images\placeholder_2.jpg" alt="img">
+            </div>
+            <div class="post-button-container">
+                <div>
+                    <btn class="btn btn-icon">Like</btn>
+                    <btn class="btn btn-icon">Dislike</btn>
+                    <btn class="btn btn-icon">Comment</btn>  
+                </div>
+                <div>
+                    <btn class="btn btn-icon">Star</btn>
+                    <btn class="btn btn-icon">Send</btn>
+                </div>  
+            </div>
+        </div>
+        <div class="post-container">
+            <div class="post-header">
+                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
+                <span class="post-username">Username</span>
+            </div>
+            <div class="post-content">
+                <p>post text</p>
+                <img src="Images\placeholder_2.jpg" alt="img">
+                <img src="Images\placeholder_3.png" alt="img">
+
+            </div>
+            <div class="post-button-container">
+                <div>
+                    <btn class="btn btn-icon">Like</btn>
+                    <btn class="btn btn-icon">Dislike</btn>
+                    <btn class="btn btn-icon">Comment</btn>  
+                </div>
+                <div>
+                    <btn class="btn btn-icon">Star</btn>
+                    <btn class="btn btn-icon">Send</btn>
+                </div>  
             </div>
         </div>
     </div>

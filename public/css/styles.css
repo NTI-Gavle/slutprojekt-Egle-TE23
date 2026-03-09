@@ -15,7 +15,7 @@
 /*Genral*/
 * {
     box-sizing: border-box;
-    margin: none;
+    margin: 0px;
     font-weight: 600 !important;
 }
 
@@ -71,6 +71,7 @@ body{
 /* Site Navigation */
 .site-nav {
     max-width: 100px;
+    margin: 30px;
 }
 .site-nav hr{
     color: var(--secondary-text-color);
@@ -99,9 +100,18 @@ body{
 
 /*Feed*/
 .feed-container{
-    display: grid;
-    grid-template-columns: auto 600px auto;
-    gap: 50px;
+    display: flex;
+    justify-content: space-between;
+}
+.feed{
+    margin: 10px 0px;
+    overflow-y: scroll;
+    height: 500px;
+    flex-direction: column;
+    justify-content: center;
+}
+.feed > h1{
+    text-align: center;
 }
 .feed-nav{
     display: flex;
@@ -124,6 +134,50 @@ body{
 .feed-nav a{
     width: 100%;
 }
+/*Scrollbar*/
+div.feed::-webkit-scrollbar{
+background-color: #00bfff;
+}
+
+/*Post*/
+.post-container{
+    background-color: var(--primary-color);
+    color: var(--post-text-color);
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+.post-header{
+    background-color: var(--secondary-color);
+    color: var(--secondary-text-color);
+    display: flex;
+    gap: 15px;
+    padding: 10px 15px;
+    border-radius: 20px;
+}
+.post-username{
+    font-size:x-large;
+    margin:auto 0px;
+}
+.post-profile-pic{
+    width: 50px;
+    height: 50px;
+    border-radius: 100px;
+}
+
+.post-content{
+    padding: 10px 20px;
+}
+.post-content > img{
+    max-width: 200px;
+    max-height: 200px;
+}
+.post-button-container{
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 20px;
+}
+
 
 /*Buttons*/
 .btn-primary{
@@ -144,28 +198,3 @@ body{
     cursor: pointer;
 }
 
-/*Post*/
-.post-container{
-    background-color: var(--primary-color);
-    color: var(--post-text-color);
-    border-radius: 20px;
-    margin-bottom: 20px;
-}
-.post-header{
-    background-color: var(--secondary-color);
-    color: var(--secondary-text-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    border-radius: 20px;
-}
-.post-content{
-    padding: 10px 20px;
-}
-
-.post-buttons{
-    display: flex;
-    gap: 10px;
-    padding: 10px 20px;
-}
