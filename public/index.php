@@ -23,9 +23,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="post-content">
                 <p>post text</p>
-                <img src="Images\placeholder_2.jpg" alt="img">
-                <img src="Images\placeholder_3.png" alt="img">
-
             </div>
             <div class="post-button-container">
                 <div>
@@ -46,7 +43,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="post-content">
                 <p>Wow i sure am enjoying this image letly. thought id share it with everyone and yeah. Well i guess theres a lot to be said about it but i relly just cant think of the words. it really is crazy how cool it is</p>
-                <img src="Images\placeholder_2.jpg" alt="img">
             </div>
             <div class="post-button-container">
                 <div>
@@ -67,9 +63,12 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="post-content">
                 <p>post text</p>
-                <img src="Images\placeholder_2.jpg" alt="img">
-                <img src="Images\placeholder_3.png" alt="img">
-
+                <div class="post-img-container">
+                    <img src="Images\placeholder_2.jpg" alt="img" class="img-fluid">
+                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
+                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
+                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
+                </div>
             </div>
             <div class="post-button-container">
                 <div>
