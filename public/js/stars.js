@@ -1,3 +1,6 @@
+//stolen from https://dev.to/usman_awan/how-i-built-a-grok-inspired-starfield-shooting-stars-using-html-canvas-3872
+//modofied but mostly stolen
+
 const canvas = document.getElementById("starfield");
 const ctx = canvas.getContext("2d");
 
@@ -13,23 +16,24 @@ function resizeCanvas() {
 }
 
 function initStars() {
-  stars = Array.from({ length: numStars }, () => ({
+  stars = Array.from({ length: numStars }, () => 
+    ({
     angle: Math.random() * Math.PI * 2,
     radius: Math.random() * Math.sqrt(canvas.width ** 2 + canvas.height ** 2),
-    speed: Math.random() * 0.0003 + 0.00015,
-    size: Math.random() * 1 + 0.5,
+    speed: Math.random() * 0.0001,
+    size: Math.random() * 1.5 + 0.5,
   }));
 }
 
 function spawnShootingStar() {
-  if (shootingStars.length === 0 && Math.random() < 0.01) {
+  if (shootingStars.length === 0 && Math.random() < 0.02) {
     shootingStars.push({
-      x: Math.random() * canvas.width * 0.5,
+      x: Math.random() * canvas.width ,
       y: Math.random() * canvas.height * 0.5,
       vx: 3 + Math.random() * 2,
       vy: 1 + Math.random() * 1.5,
-      life: 80,
-      initialLife: 80,
+      life: 300,
+      initialLife: 300,
     });
   }
 }
@@ -38,11 +42,11 @@ function animate() {
   const centerX = canvas.width;
   const centerY = canvas.height;
 
-const grad=ctx.createLinearGradient(0,0, 0,800);
-grad.addColorStop(0, "#00bfff");
-grad.addColorStop(1, "#edfcff");
-ctx.fillStyle = grad;
-ctx.fillRect(0,0,canvas.width, canvas.height);
+  const grad=ctx.createLinearGradient(0,0, 0,800);
+  grad.addColorStop(0, "#00bfff");
+  grad.addColorStop(1, "#edfcff");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,canvas.width, canvas.height);
 
   // Stars orbiting
   stars.forEach((star, i) => {
@@ -50,7 +54,7 @@ ctx.fillRect(0,0,canvas.width, canvas.height);
     const x = centerX + star.radius * Math.cos(star.angle);
     const y = centerY + star.radius * Math.sin(star.angle);
 
-    const flicker = 0.4 + Math.abs(Math.sin(Date.now() * 0.0015 + i)) * 0.5;
+    const flicker = 0.4 + Math.abs(Math.sin(Date.now() * 0.0001 + i)) * 0.5;
 
     ctx.beginPath();
     ctx.fillStyle = `rgba(255, 255, 255, ${flicker})`;
@@ -64,22 +68,18 @@ ctx.fillRect(0,0,canvas.width, canvas.height);
     const s = shootingStars[i];
     const opacity = s.life / s.initialLife;
 
-    const grad = ctx.createLinearGradient(
-      s.x,
-      s.y,
-      s.x - s.vx * 35,
-      s.y - s.vy * 35
-    );
+    const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * 35, s.y - s.vy * 35);
+
     grad.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
     grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
     ctx.strokeStyle = grad;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(s.x, s.y);
-    ctx.lineTo(s.x - s.vx * 18, s.y - s.vy * 18);
+    ctx.lineTo(s.x - s.vx * -18, s.y - s.vy * 18);
     ctx.stroke();
 
-    s.x += s.vx;
+    s.x -= s.vx;
     s.y += s.vy;
     s.life -= 1;
 
@@ -87,11 +87,9 @@ ctx.fillRect(0,0,canvas.width, canvas.height);
       shootingStars.splice(i, 1);
     }
   }
-
   animationId = requestAnimationFrame(animate);
 }
 
-// Init
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 animate();
