@@ -2,7 +2,6 @@
 $pageTitle = "Home"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
 ?>
-<canvas id="starfield"></canvas>
 <div class="feed-container">
 <nav class="feed-nav">
     <ul>

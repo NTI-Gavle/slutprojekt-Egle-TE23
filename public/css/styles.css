@@ -1,6 +1,7 @@
 /*Colors*/
 :root {
-    --bg-gradient: linear-gradient(#00bfff, #edfcff);
+    --bg-gradient-top: #00bfff;
+    --bg-gradient-bottom: #edfcff;
     --primary-color:  #d6f6ff;
     --secondary-color:#00bfff;
     --primary-text-color: #00bfff;
@@ -8,6 +9,23 @@
     --post-text-color: #000000;
     --text-midtone-color: #81dfff;
     --accent-color: #ffea00;
+    --border-color:#00bfff;
+
+    --white: #fff;
+    --black: #000;
+
+}
+.darkmode{
+    --bg-gradient-top: #03002d;
+    --bg-gradient-bottom: #453f96;
+    --primary-color:  #1b214c;
+    --secondary-color:#9fabff;
+    --primary-text-color: #fff;
+    --secondary-text-color: #fff;
+    --post-text-color: #fff;
+    --text-midtone-color: #fff;
+    --accent-color: #dee1ff;
+    --border-color: #fff;
 
     --white: #fff;
     --black: #000;
@@ -17,6 +35,9 @@
     box-sizing: border-box;
     margin: 0px;
     font-weight: 600 !important;
+    
+    scrollbar-color: var(--secondary-color) var(--primary-color);
+    scrollbar-width: thin;  
 }
 
 /*Body*/
@@ -26,6 +47,8 @@ body{
     color: var(--secondary-text-color);
     margin: 0;
     padding: 0;
+
+
 }
 /*BACKGROUND*/
 #starfield {
@@ -37,7 +60,11 @@ body{
     height: 100%;
     pointer-events: none;
 }
-
+#canvasColorsSource{
+    display: none;
+    color: var(--bg-gradient-top) !important;
+    background-color: var(--bg-gradient-bottom) !important;
+}
 /* Header */
 .site-header {
     background-color: var(--primary-color);
@@ -143,12 +170,7 @@ body{
 .feed-nav a{
     width: 100%;
 }
-/*Scrollbar*/
-:root{
-    scrollbar-color: var(--secondary-color) var(--primary-color);
-    scrollbar-width: thin;
-    border-radius: 10px;
-}
+
 /*Post*/
 .post-feed{
     overflow-y: scroll;
@@ -158,7 +180,8 @@ body{
 .post-container{
     background-color: var(--primary-color);
     color: var(--post-text-color);
-    border-radius: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 22px;
     margin-bottom: 20px;
 }
 .post-header{
@@ -227,6 +250,7 @@ body{
     color: var(--secondary-text-color);
 }
 .btn-icon{
+    color: var(--post-text-color); /*temp just to see, will replace with icons so this wont be needed*/
     background: none;
     border: none;
     cursor: pointer;

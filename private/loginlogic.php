@@ -11,7 +11,7 @@ if (isset($_POST["password"])) {
 }
 
 if (!(isset($pass) && isset($user))) {
-    header("Location: login.php");
+    header("Location: ../public/login.php");
 }
 $sql = "SELECT * FROM users WHERE username =?";
 $stmt = $dbconn->prepare($sql);
@@ -24,9 +24,9 @@ $res = $stmt->fetch(PDO::FETCH_ASSOC);
 if (password_verify($pass, $res["password"])) {
     $_SESSION["user_id"] = $res["id"];
     $_SESSION["username"] = $res["username"];
-    header("Location: main.php");
+    header("Location: ../public/index.php");
 } else {
     $_SESSION["loginError"] = "Wrong username or password";
-    header("Location: login.php");
+    header("Location: ../public/login.php");
 }
 ?>

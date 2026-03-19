@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" > <!--place dark mode class here to scrollbar also has dark mode-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,9 +16,9 @@
         <h1 class="site-title">
             <a href="index.php">LO-GO</a>
         </h1>
-
         <a href="login.php"><img src="" alt="login image"></a>
+        <div id="canvasColorsSource"></div>
     </div>
 </header>
-
+<canvas id="starfield"></canvas>
 <main class="main-content">

@@ -4,6 +4,10 @@
 const canvas = document.getElementById("starfield");
 const ctx = canvas.getContext("2d");
 
+var sourceElement = document.getElementById("canvasColorsSource");
+var topColor = window.getComputedStyle(sourceElement,null).getPropertyValue("color");
+var bottomColor = window.getComputedStyle(sourceElement,null).getPropertyValue("background-color");
+
 let stars = [];
 let shootingStars = [];
 const numStars = 200;
@@ -43,8 +47,8 @@ function animate() {
   const centerY = canvas.height;
 
   const grad=ctx.createLinearGradient(0,0, 0,800);
-  grad.addColorStop(0, "#00bfff");
-  grad.addColorStop(1, "#edfcff");
+  grad.addColorStop(0, topColor);
+  grad.addColorStop(1, bottomColor);
   ctx.fillStyle = grad;
   ctx.fillRect(0,0,canvas.width, canvas.height);
 

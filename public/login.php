@@ -7,11 +7,11 @@ if (isset($_SESSION["loginError"])) {
     unset($_SESSION["loginError"]);
 }
 
-$pageTitle = "Login"; // <-- set dynamic page title
+$pageTitle = "Login";
 require_once __DIR__ . '/../includes/header.php';
 ?>
     <div id="login-container">
-    <form action="loginlogic.php" method="post" class="login-form">
+    <form action="../private/loginlogic.php" method="post" class="login-form">
     <div class="post-header">
         <h1>LOGIN</h1>
     </div>    

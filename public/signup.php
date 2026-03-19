@@ -11,7 +11,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
     <div style="margin:50px;">
-        <form action="signuplogic.php" method="post" class="signup-form">
+        <form action="../private/signuplogic.php" method="post" class="signup-form">
             <h1 style="color:blueviolet; width: fit-content;" class="m-auto ">SIGNUP</h1>
             <div class="form-group">
                 <label for="passwordConfirm">Email</label>
