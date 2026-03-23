@@ -1,5 +1,5 @@
 <?php
-include '/../database/dbconnection.php';
+include '../private/dbconnection.php';
 session_start();
 
 $errorMessage = "";
@@ -16,7 +16,7 @@ $user = $stmt->fetch();
 
 if (!$user["id"]) {
     $_SESSION["loginerror"] = "Invalid or expired reset link.";
-    header("Location: login.php");
+    header("Location: ../public/login.php");
     exit;
 }
 $pageTitle = "Home"; // <-- set dynamic page title
@@ -24,11 +24,8 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <body>
-    <?php
-    include("header.php");
-    ?>
     <div style="margin:50px;">
-        <form action="new-password-logic.php" method="post" class="login-form">
+        <form action="../private/new-password-logic.php" method="post" class="login-form">
             <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
             <h1 style="color:blueviolet; width: fit-content;" class="m-auto ">Set New Password</h1>
             <p class="">Reset password for: <?= $user["email"] ?></p>

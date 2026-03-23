@@ -1,12 +1,17 @@
 <?php
-$pageTitle = "Home"; // <-- set dynamic page title
+$pageTitle = "Profile"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="feed-container">
 <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
 <div class="feed">
-    <h1>&ltdiscorver&gt</h1>
+    <div class="profile-container">
+        <div class="post-header">
+                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
+                <span class="post-username">Username</span>
+        </div>
+    </div>
     <div class="post-feed">
         <div class="post-container">
             <div class="post-header">

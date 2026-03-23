@@ -1,5 +1,5 @@
 <?php
-include 'dbconnection.php';
+include '../private/dbconnection.php';
 session_start();
 
 $pageTitle = "Home"; // <-- set dynamic page title
@@ -8,7 +8,7 @@ require_once __DIR__ . '/../includes/header.php';
 
 <body>
     <div style="margin:50px;">
-        <form action="reset-password-logic.php" method="POST" class="login-form">
+        <form action="../private/reset-password-logic.php" method="POST" class="login-form">
             <h1 style="color:blueviolet; width: fit-content;" class="m-auto ">Reset password</h1>
 
             <div class="form-group">

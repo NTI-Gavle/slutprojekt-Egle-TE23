@@ -21,15 +21,15 @@ $stmt = $dbconn->prepare("UPDATE users SET reset_token = ?, reset_expires = ? WH
 $stmt->execute([$token, $expires, $user['id']]);
 
 $ipAddress = $_SERVER['HTTP_HOST'];
-$link = "http://$ipAddress/DeluxQUIZ/reset-password-confirm.php?token=$token";
+$link = "http://$ipAddress/SLUTPROJEKT%20WEB/slutprojekt-Egle-TE23/public/reset-password-confirm.php?token=$token";
 
 sendMail(
     $email,
-    "EPIC QUIZ Password reset",
+    "LO-GO Password reset",
     "Lol you forgot your password. Click here to reset it:\n$link"
 );
 
 $_SESSION['reset_msg'] = "A reset link was sent to ". $email .". The link will expire in 30 minutes.";
-header("Location: reset-password.php");
+header("Location: ../public/reset-password.php");
 exit;
 ?>
