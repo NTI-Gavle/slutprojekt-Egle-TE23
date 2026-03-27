@@ -1,18 +1,32 @@
 <?php
-$pageTitle = "Home"; // <-- set dynamic page title
+$pageTitle = "Profile"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <div class="feed-container">
 <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
 <div class="feed">
-    <h1>&ltdiscorver&gt</h1>
+    <div class="profile-container">
+        <div class="post-header">
+                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
+                <span class="post-username">Username</span>
+        </div>
+        <div class="profile-container">
+            <img src="Images\placeholder_1.png" alt="profile-background" class="profile-background">
+            <img src="Images\placeholder_3.png" alt="profile picture" class="profile-pic">
+            <p>Name</p>
+            <p>@username</p>
+            <button class="btn secondary-btn">&ltedit&gt</button>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et dignissim odio. Nunc ullamcorper lacus ac arcu faucibus, a maximus tellus interdum. Aliquam placerat nulla pretium nulla congue, gravida suscipit sapien ultrices. Curabitur tincidunt rutrum odio, vel ullamcorper sem lacinia quis. Fusce eget leo quis velit rhoncus rhoncus sed venenatis elit. </p>
+        </div>
+    </div>
     <div class="post-feed">
         <div class="post-container">
             <div class="post-header">
                 <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
                 <span class="post-username">Username</span>
             </div>
+         
             <div class="post-content">
                 <p>post text</p>
             </div>
