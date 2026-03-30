@@ -110,7 +110,7 @@ body{
 /* Site Navigation */
 .site-nav {
     position: sticky;
-    top: 20px;
+    top: 130px;
     height: fit-content;
     max-width: 100px;
     margin: 30px;
@@ -155,7 +155,7 @@ body{
 }
 .feed-nav{
     position: sticky !important;
-    top: 20px;
+    top: 130px;
     display: flex;
     flex-direction: column;
     background-color: var(--secondary-color);
