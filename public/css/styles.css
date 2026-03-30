@@ -40,13 +40,22 @@
     scrollbar-width: thin;  
 }
 
-/*Body*/
+/*GENERAL*/
 body{
     font-family: monospace, sans-serif;
     background: var(--bg-gradient);
     color: var(--secondary-text-color);
     margin: 0;
     padding: 0;
+}
+.link-p {
+    color: var(--primary-text-color);
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.link-p:hover {
+    text-decoration: underline;
 }
 /*BACKGROUND*/
 #starfield {
@@ -67,7 +76,12 @@ body{
 .site-header {
     background-color: var(--primary-color);
     color: var(--primary-text-color);
+
     padding: 10px 0;
+}
+#header{
+    position: sticky;
+    top: 0px;
 }
 
 .header-container {
@@ -93,18 +107,11 @@ body{
     margin-top: 40px;
 }
 
-.site-footer a {
-    color: var(--primary-text-color);
-    text-decoration: none;
-    margin: 0 5px;
-}
-
-.site-footer a:hover {
-    text-decoration: underline;
-}
-
 /* Site Navigation */
 .site-nav {
+    position: sticky;
+    top: 20px;
+    height: fit-content;
     max-width: 100px;
     margin: 30px;
 }
@@ -147,6 +154,8 @@ body{
     text-align: center;
 }
 .feed-nav{
+    position: sticky !important;
+    top: 20px;
     display: flex;
     flex-direction: column;
     background-color: var(--secondary-color);
@@ -171,8 +180,6 @@ body{
 
 /*Post*/
 .post-feed{
-    overflow-y: scroll;
-    height: 500px;
     padding: 0px 10px;
 }
 .post-container{
@@ -233,7 +240,9 @@ body{
 .login-content{
     padding: 20px;
 }
-
+.login-button{
+    margin: 10px auto;
+}
 /*Buttons*/
 .btn-primary{
     background-color: var(--primary-color);

@@ -11,7 +11,7 @@
     <script src="js/stars.js" defer></script>
 </head>
 <body>
-<header class="site-header">
+<header class="site-header" id="header">
     <div class="header-container">
         <h1 class="site-title">
             <a href="index.php">LO-GO</a>

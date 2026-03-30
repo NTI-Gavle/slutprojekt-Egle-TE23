@@ -30,7 +30,11 @@ require_once __DIR__ . '/../includes/header.php';
         }
         ?>
         <button type="submit" class="btn btn-secondary login-button">Login</button>
-        <div><a href="reset-password.php" class="login-link">forgot password</a> <br><a href="signup.php" class="login-link">signup instead</a></div>
+        <div>
+            <a href="reset-password.php" class="link-p">forgot password</a> 
+        <br>
+        <a href="signup.php" class="link-p">signup instead</a>
+    </div>
     </div>
     </form>
     </div>

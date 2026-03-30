@@ -10,10 +10,13 @@ $pageTitle = "Home"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-    <div style="margin:50px;">
-        <form action="../private/signuplogic.php" method="post" class="signup-form">
-            <h1 style="color:blueviolet; width: fit-content;" class="m-auto ">SIGNUP</h1>
-            <div class="form-group">
+    <div id="login-container">
+    <form action="../private/signuplogic.php" method="post" class="login-form">
+    <div class="post-header">
+        <h1>LOGIN</h1>
+    </div>    
+    <div class="login-content">
+          <div class="form-group">
                 <label for="passwordConfirm">Email</label>
                 <input type="email" class="form-control" id="email" name="email" placeholder="Email address"
                     maxlength="1000">
@@ -40,14 +43,16 @@ require_once __DIR__ . '/../includes/header.php';
 
                 <small class="char-counter" data-for="passwordConfirm"></small>
             </div>
-            <?php
-            if ($errorMessage != "") {
-                echo "<p id='errormsg-purple'>" . $errorMessage . "</p>";
-            }
-            ?>
-            <button type="submit" class="btn btn-primary login-button">Signup</button>
-            <div><a href="login.php" class="login-link">login instead</a></div>
-        </form>
+        <?php
+        if ($errorMessage != "") {
+            echo "<p id='errormsg'>" . $errorMessage . "</p>";
+        }
+        ?>
+            
+        <button type="submit" class="btn btn-primary login-button">Signup</button>
+        <div><a href="login.php" class="link-p">login instead</a></div>
+    </div>
+    </form>
     </div>
 </body>
 
