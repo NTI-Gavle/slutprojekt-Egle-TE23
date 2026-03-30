@@ -38,9 +38,7 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="form-group">
                 <label for="passwordConfirm">Confirm Password</label>
-                <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm"
-                    placeholder="Confirm password" maxlength="50">
-
+                <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" placeholder="Confirm password" maxlength="50">
                 <small class="char-counter" data-for="passwordConfirm"></small>
             </div>
         <?php
@@ -49,7 +47,7 @@ require_once __DIR__ . '/../includes/header.php';
         }
         ?>
             
-        <button type="submit" class="btn btn-primary login-button">Signup</button>
+        <button type="submit" class="btn btn-secondary login-button">&ltSignup&gt</button>
         <div><a href="login.php" class="link-p">login instead</a></div>
     </div>
     </form>

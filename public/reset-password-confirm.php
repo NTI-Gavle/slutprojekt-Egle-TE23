@@ -24,10 +24,13 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <body>
-    <div style="margin:50px;">
-        <form action="../private/new-password-logic.php" method="post" class="login-form">
+    <div id="login-container">
+    <form action="../private/new-password-logic.php" method="post" class="login-form">
+    <div class="post-header">
+        <h1>RESET PASSWORD</h1>
+    </div>    
+    <div class="login-content">
             <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
-            <h1 style="color:blueviolet; width: fit-content;" class="m-auto ">Set New Password</h1>
             <p class="">Reset password for: <?= $user["email"] ?></p>
             <input type="password" id="password" class="form-control mt-3" name="password" required placeholder="New password" maxlength="50">
 
@@ -40,8 +43,10 @@ require_once __DIR__ . '/../includes/header.php';
                 echo "<p id='errormsg-purple'>" . $errorMessage . "</p>";
             }
             ?>
-            <button type="submit" class="btn btn-primary login-button mt-3">Reset password</button>
-        </form>
+            <button type="submit" class="btn btn-secondary login-button mt-3">&ltReset password&gt</button>
+    </div>
+    </div>
+    </form>
     </div>
 </body>
 

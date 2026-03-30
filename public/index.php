@@ -2,9 +2,24 @@
 $pageTitle = "Home"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
 ?>
+
+<div id="create-post-popout">
+    <div class="post-container create-post-container">
+            <div class="post-header">
+                <button onclick="CloseCreatePost()" class="btn btn-icon">X</button>
+                <span class="post-username">Username</span>
+            </div>
+            <div class="post-content">
+                <form action="../private/create-post.php">
+                    <div class="form-group"></div>
+                        <input type="text" name="create-post-text" id="create-post-text" class="form-control" placeholder="tell the world something!">
+                </form>
+            </div>
+        </div>
+</div>
+
 <div class="feed-container">
 <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
-
 <div class="feed">
     <h1>&ltdiscorver&gt</h1>
     <div class="post-feed">

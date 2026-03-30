@@ -53,9 +53,11 @@ body{
     text-decoration: none;
     margin: 0 5px;
 }
-
 .link-p:hover {
     text-decoration: underline;
+}
+::selection {
+  background: var(--accent-color);
 }
 /*BACKGROUND*/
 #starfield {
@@ -139,7 +141,20 @@ body{
     font-size: 35px;
 }
 
-
+/*NEW POst*/
+#create-post-popout{
+    background-color: rgba(0,0,0, 0.5);
+    width: 100vw;
+    height: 100vh;
+    top:0;
+    position:fixed;
+    display: flex;
+    align-items: center;
+    z-index: 10;
+}
+.create-post-container{
+    margin: 0px auto;
+}
 /*Feed*/
 .feed-container{
     display: flex;

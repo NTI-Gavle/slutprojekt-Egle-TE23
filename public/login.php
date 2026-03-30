@@ -29,7 +29,7 @@ require_once __DIR__ . '/../includes/header.php';
             echo "<p id='errormsg'>" . $errorMessage . "</p>";
         }
         ?>
-        <button type="submit" class="btn btn-secondary login-button">Login</button>
+        <button type="submit" class="btn btn-secondary login-button">&ltLogin&gt</button>
         <div>
             <a href="reset-password.php" class="link-p">forgot password</a> 
         <br>
