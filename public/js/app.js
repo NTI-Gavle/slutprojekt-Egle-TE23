@@ -8,3 +8,10 @@ if (this.oldScroll > this.scrollY) {
 }
 this.oldScroll = this.scrollY; 
 }
+
+function CloseCreatePost(){
+    document.getElementById("create-post-popout").style.display="none";
+}
+function OpenCreatePost(){
+    document.getElementById("create-post-popout").style.display="flex";
+}

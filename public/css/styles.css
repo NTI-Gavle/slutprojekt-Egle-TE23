@@ -148,7 +148,8 @@ body{
     height: 100vh;
     top:0;
     position:fixed;
-    display: flex;
+    /*display: flex;*/
+    display: none;
     align-items: center;
     z-index: 10;
 }
@@ -220,7 +221,7 @@ body{
     width: 50px;
     height: 50px;
     border-radius: 100px;
-        aspect-ratio: 1;
+    aspect-ratio: 1;
     object-fit: cover;
 }
 
@@ -245,6 +246,24 @@ body{
     justify-content: space-between;
     gap: 10px;
     padding: 10px 20px;
+}
+
+/*Profile*/
+.profile-pic{
+    position: relative;
+    top: -90px;
+    margin-left: 30px;
+    width: 180px;
+    height: 180px;
+    border-radius: 100px;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+.profile-background{
+    width: 800px;
+    border-radius: 10px;
+    aspect-ratio: 3;
+    object-fit: cover;
 }
 /*Login Sighnup*/
 #login-container{

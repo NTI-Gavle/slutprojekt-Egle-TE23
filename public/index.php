@@ -11,8 +11,18 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <div class="post-content">
                 <form action="../private/create-post.php">
-                    <div class="form-group"></div>
+                    <div class="form-group">
                         <input type="text" name="create-post-text" id="create-post-text" class="form-control" placeholder="tell the world something!">
+                    </div>
+                    <div class="post-button-container">
+                <div>
+                    <btn class="btn btn-icon">Image</btn>
+                    <btn class="btn btn-icon">Emoji</btn> 
+                </div>
+                <div>
+                    <input type="submit" class="btn btn-secondary" value="Post">
+                </div>  
+            </div>
                 </form>
             </div>
         </div>

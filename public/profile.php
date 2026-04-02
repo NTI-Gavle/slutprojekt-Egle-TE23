@@ -6,7 +6,7 @@ require_once __DIR__ . '/../includes/header.php';
 <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
 <div class="feed">
-    <div class="profile-container">
+    <div class="profile-container post-container">
         <div class="post-header">
                 <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
                 <span class="post-username">Username</span>
