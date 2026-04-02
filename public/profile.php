@@ -1,43 +1,32 @@
 <?php
-$pageTitle = "Home"; // <-- set dynamic page title
+$pageTitle = "Profile"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
 ?>
-
-<div id="create-post-popout">
-    <div class="post-container create-post-container">
-            <div class="post-header">
-                <button onclick="CloseCreatePost()" class="btn btn-icon">X</button>
-                <span class="post-username">Username</span>
-            </div>
-            <div class="post-content">
-                <form action="../private/create-post.php">
-                    <div class="form-group">
-                        <input type="text" name="create-post-text" id="create-post-text" class="form-control" placeholder="tell the world something!">
-                    </div>
-                    <div class="post-button-container">
-                <div>
-                    <btn class="btn btn-icon">Image</btn>
-                    <btn class="btn btn-icon">Emoji</btn> 
-                </div>
-                <div>
-                    <input type="submit" class="btn btn-secondary" value="Post">
-                </div>  
-            </div>
-                </form>
-            </div>
-        </div>
-</div>
-
 <div class="feed-container">
 <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
+
 <div class="feed">
-    <h1>&ltdiscorver&gt</h1>
+    <div class="profile-container post-container">
+        <div class="post-header">
+                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
+                <span class="post-username">Username</span>
+        </div>
+        <div class="profile-container">
+            <img src="Images\placeholder_1.png" alt="profile-background" class="profile-background">
+            <img src="Images\placeholder_3.png" alt="profile picture" class="profile-pic">
+            <p>Name</p>
+            <p>@username</p>
+            <button class="btn secondary-btn">&ltedit&gt</button>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et dignissim odio. Nunc ullamcorper lacus ac arcu faucibus, a maximus tellus interdum. Aliquam placerat nulla pretium nulla congue, gravida suscipit sapien ultrices. Curabitur tincidunt rutrum odio, vel ullamcorper sem lacinia quis. Fusce eget leo quis velit rhoncus rhoncus sed venenatis elit. </p>
+        </div>
+    </div>
     <div class="post-feed">
         <div class="post-container">
             <div class="post-header">
                 <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
                 <span class="post-username">Username</span>
             </div>
+         
             <div class="post-content">
                 <p>post text</p>
             </div>
@@ -101,7 +90,9 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </div>
-  <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
+
+<?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
+
 </div>
 
 <?php
