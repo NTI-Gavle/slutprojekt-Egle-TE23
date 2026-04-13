@@ -150,13 +150,20 @@ body{
     top:0;
     position:fixed;
     /*display: flex;*/
-    display: flex;
+    display: none;
     align-items: center;
     z-index: 10;
 }
 .create-post-container{
     margin: 0px auto;
     width: 60%;
+}
+#create-post-text{
+    resize: none;
+    border: none;
+}
+#create-post-text::placeholder{
+    color: var(--text-midtone-color);
 }
 /*Feed*/
 .feed-container{

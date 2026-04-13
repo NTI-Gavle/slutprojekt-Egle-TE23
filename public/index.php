@@ -12,7 +12,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="post-content">
                 <form action="../private/create-post.php">
                     <div class="form-group">
-                        <input type="text" name="create-post-text" id="create-post-text" class="form-control" placeholder="tell the world something!">
+                        <textarea type="text" maxlength="500" name="create-post-text" id="create-post-text" class="form-control" placeholder="tell the world something!"></textarea>
                     </div>
                     <div class="post-button-container">
                 <div>
