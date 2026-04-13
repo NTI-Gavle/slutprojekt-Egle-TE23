@@ -6,18 +6,32 @@ require_once __DIR__ . '/../includes/header.php';
 <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
 <div class="feed">
-    <div class="profile-container post-container">
+    <div class="post-container">
         <div class="post-header">
                 <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
                 <span class="post-username">Username</span>
         </div>
         <div class="profile-container">
-            <img src="Images\placeholder_1.png" alt="profile-background" class="profile-background">
+            <div class="profile-background-container">
+                <img src="Images\placeholder_1.png" alt="profile-background" class="profile-background">
+            </div>
             <img src="Images\placeholder_3.png" alt="profile picture" class="profile-pic">
-            <p>Name</p>
-            <p>@username</p>
-            <button class="btn secondary-btn">&ltedit&gt</button>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et dignissim odio. Nunc ullamcorper lacus ac arcu faucibus, a maximus tellus interdum. Aliquam placerat nulla pretium nulla congue, gravida suscipit sapien ultrices. Curabitur tincidunt rutrum odio, vel ullamcorper sem lacinia quis. Fusce eget leo quis velit rhoncus rhoncus sed venenatis elit. </p>
+            <div class="profile-name">
+                <div>
+                    <p>Name</p>
+                    <p>@username</p>
+                </div>
+                <button class="btn btn-secondary btn-sm">&ltedit&gt</button>   
+            </div>
+            <div class="profile-description">
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et dignissim odio. Nunc ullamcorper lacus ac arcu faucibus, a maximus tellus interdum. Aliquam placerat nulla pretium nulla congue, gravida suscipit sapien ultrices. Curabitur tincidunt rutrum odio, vel ullamcorper sem lacinia quis. Fusce eget leo quis velit rhoncus rhoncus sed venenatis elit. </p>
+            </div>
+            <div class="profile-stats">
+
+            </div>
+            <div class="profile-buttons">
+
+            </div>
         </div>
     </div>
     <div class="post-feed">

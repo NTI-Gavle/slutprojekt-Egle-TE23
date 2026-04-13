@@ -50,7 +50,7 @@ if (!empty($res)) {
     die();
 }
 
-$sql = "SELECT * FROM users WHERE username =?";
+$sql = "SELECT * FROM Users WHERE Username =?";
 $stmt = $dbconn->prepare($sql);
 $data = array($user);
 $stmt->execute($data);
