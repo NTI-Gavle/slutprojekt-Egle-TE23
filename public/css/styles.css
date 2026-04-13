@@ -304,6 +304,15 @@ body{
 .login-button{
     margin: 10px auto;
 }
+
+/*OCNTACT*/
+.contact-form{
+    padding: 10px 50px;
+    display: flex;
+    flex-wrap:wrap;
+    flex-direction: column;
+    gap:10px;
+}
 /*Buttons*/
 .btn-primary{
     background-color: var(--primary-color);

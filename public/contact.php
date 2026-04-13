@@ -35,21 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<h2>Contact Us</h2>
-
-<?php if ($success): ?>
-    <p class="success-message">Thank you! Your message has been sent.</p>
-<?php endif; ?>
-
-<?php if ($errors): ?>
-    <ul class="error-messages">
-        <?php foreach ($errors as $error): ?>
-            <li><?= htmlspecialchars($error) ?></li>
-        <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
 
 <form action="contact.php" method="post" class="contact-form">
+    <h2>Contact ME!</h2>
     <label for="name">Name:</label>
     <input type="text" name="name" id="name" value="<?= htmlspecialchars($name) ?>">
 
@@ -58,6 +46,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <label for="message">Message:</label>
     <textarea name="message" id="message"><?= htmlspecialchars($message) ?></textarea>
+
+    <?php if ($success): ?>
+        <p class="success-message">Thank you! Your message has been sent.</p>
+    <?php endif; ?>
+
+    <?php if ($errors): ?>
+        <ul class="error-messages">
+            <?php foreach ($errors as $error): ?>
+                <li><?= htmlspecialchars($error) ?></li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
 
     <button type="submit">Send</button>
 </form>
