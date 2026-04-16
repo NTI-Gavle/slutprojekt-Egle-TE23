@@ -24,28 +24,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Message cannot be empty.";
     }
 
-    // If no errors, you can send email or save to DB
     if (!$errors) {
-        // Example: send email (requires proper mail setup)
-        // mail("you@example.com", "Contact Form Message from $name", $message, "From:$email");
+
+        mail("egle20161130@gmail.com", "Contact Form Message from $name", $message, "From:$email");
 
         $success = true;
-        $name = $email = $message = ''; // clear form
+        $name = $email = $message = '';
     }
 }
 ?>
 
-
-<form action="contact.php" method="post" class="contact-form">
-    <h2>Contact ME!</h2>
+<div id="login-container">
+<form action="contact.php" method="post" class="login-form">
+    <div class="post-header">
+        <h1>CONTACT ME!</h1>
+    </div>  
+    <div class="login-content">
+            <div class="form-group">
     <label for="name">Name:</label>
-    <input type="text" name="name" id="name" value="<?= htmlspecialchars($name) ?>">
+    <input class="form-control" type="text" name="name" id="name" value="<?= htmlspecialchars($name) ?>">
 
     <label for="email">Email:</label>
-    <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>">
+    <input class="form-control" type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>">
 
     <label for="message">Message:</label>
-    <textarea name="message" id="message"><?= htmlspecialchars($message) ?></textarea>
+    <textarea class="form-control" name="message" id="message"><?= htmlspecialchars($message) ?></textarea>
 
     <?php if ($success): ?>
         <p class="success-message">Thank you! Your message has been sent.</p>
@@ -59,8 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </ul>
     <?php endif; ?>
 
-    <button type="submit">Send</button>
+    <button type="submit" class="btn btn-secondary">Send</button>
+    </div> 
+    </div> 
 </form>
+</div>
 
 <?php
 require_once __DIR__ . '/../includes/footer.php';

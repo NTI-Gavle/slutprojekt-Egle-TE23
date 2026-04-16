@@ -42,11 +42,15 @@
 
 /*GENERAL*/
 body{
-    font-family: monospace, sans-serif;
+    font-family: monospace, sans-serif !important;
     background: var(--bg-gradient);
     color: var(--secondary-text-color);
     margin: 0;
     padding: 0;
+}
+h1,h2,h3,h4,p
+{
+    font-family: monospace, sans-serif !important;
 }
 .link-p {
     color: var(--primary-text-color);
@@ -78,7 +82,6 @@ body{
 .site-header {
     background-color: var(--primary-color);
     color: var(--primary-text-color);
-
     padding: 10px 0;
 }
 #header{
@@ -86,7 +89,6 @@ body{
     top: 0px;
     z-index: 100;
 }
-
 .header-container {
     max-width: 1000px;
     margin: 0 auto;
@@ -94,11 +96,32 @@ body{
     justify-content: space-between;
     align-items: center;
 }
-
 .site-title a {
     color: var(--primary-text-color);
     text-decoration: none;
     font-size: 1.5em;
+}
+
+/*Search*/
+#search-bar{
+    background-color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px 10px;
+    border-radius: 10px;
+    color: var(--secondary-text-color);
+}
+#search-field{
+    background-color: var(--secondary-color);
+    border: none;
+    color: var(--secondary-text-color);
+    width: 400px;
+    width: 100%;
+    border-radius: 5px;
+}
+#search-field::placeholder{
+    color: var(--text-midtone-color);
 }
 
 /* Footer */
@@ -188,6 +211,7 @@ body{
     border-radius: 20px;
     padding: 20px;
     margin: 30px;
+    margin-left: 20px;
     width: fit-content;
     height: fit-content;
 }
