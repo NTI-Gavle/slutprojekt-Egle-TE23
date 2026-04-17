@@ -1,3 +1,6 @@
+<?php
+include '../private/dbconnection.php';
+?>
 <!DOCTYPE html>
 <html lang="en" > <!--place dark mode class here to scrollbar also has dark mode-->
 <head>
