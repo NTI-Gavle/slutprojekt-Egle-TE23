@@ -13,16 +13,18 @@ if (isset($_POST["password"])) {
 if (!(isset($pass) && isset($user))) {
     header("Location: ../public/login.php");
 }
-$sql = "SELECT * FROM Users WHERE Username =?";
+$sql = "SELECT * FROM users WHERE Username =?";
 $stmt = $dbconn->prepare($sql);
 
 $data = array($user);
 $stmt->execute($data);
 $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (password_verify($pass, $res["password"])) {
+
+
+if (password_verify($pass, $res["Password"])) {
     $_SESSION["user_id"] = $res["id"];
-    $_SESSION["username"] = $res["username"];
+    $_SESSION["username"] = $res["Username"];
     header("Location: ../public/index.php");
 } 
 else {
