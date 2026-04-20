@@ -1,16 +1,36 @@
 <?php
 $pageTitle = "Home"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
+
+include('../private/dbconnection.php');
+
+$sql = "SELECT * FROM users WHERE Username =?";
+$stmt = $dbconn->prepare($sql);
+$data = array($_SESSION["username"]);
+$stmt->execute($data);
+$res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$sql = "SELECT * FROM userprofiles WHERE UserId =?";
+$stmt = $dbconn->prepare($sql);
+$data = array($_SESSION["user_id"]);
+$stmt->execute($data);
+$profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$sql = "SELECT id FROM posts WHERE UserId =?";
+$stmt = $dbconn->prepare($sql);
+$data = array($_SESSION["user_id"]);
+$stmt->execute($data);
+$posts = $stmt->fetch(PDO::FETCH_ASSOC);
 ?>
 
 <div id="create-post-popout">
     <div class="post-container create-post-container">
             <div class="post-header">
                 <button onclick="CloseCreatePost()" class="btn btn-icon">X</button>
-                <span class="post-username">Username</span>
+                <span class="post-username"><?php echo(htmlspecialchars($profile["Nickname"]))?></span>
             </div>
             <div class="post-content">
-                <form action="../private/create-post.php">
+                <form action="../private/create-post.php" method="post">
                     <div class="form-group">
                         <textarea type="text" maxlength="500" name="create-post-text" id="create-post-text" class="form-control" placeholder="tell the world something!"></textarea>
                     </div>

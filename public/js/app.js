@@ -4,7 +4,7 @@ function scrollFunction() {
 if (this.oldScroll > this.scrollY ) {
     document.querySelector("header").style.transform = "translateY(0px)"; 
 }else {
-    document.querySelector("header").style.transform = "translateY(-100px)";
+    document.querySelector("header").style.transform = "translateY(-120px)";
 }
 this.oldScroll = this.scrollY; 
 }

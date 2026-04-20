@@ -39,8 +39,6 @@
     scrollbar-color: var(--secondary-color) var(--primary-color);
     scrollbar-width: thin;  
 }
-
-/*GENERAL*/
 body{
     font-family: monospace, sans-serif !important;
     background: var(--bg-gradient);
@@ -63,6 +61,7 @@ h1,h2,h3,h4,p
 ::selection {
   background: var(--accent-color);
 }
+
 /*BACKGROUND*/
 #starfield {
     z-index: -1;
@@ -195,42 +194,7 @@ h1,h2,h3,h4,p
     max-width: 1200px;
     margin: 0px auto;
 }
-@media screen and (max-width: 900px) {
-    .feed-container {
-        grid-template-columns: 1fr;
-        max-width: 100%;
-    }
-    .feed-nav{
-        top: 10 !important;
-        flex-direction: row !important;
-        margin: 10px 0 !important;
-        width: 100% !important;
-    }
-    .site-nav {
-        position:fixed;
-        top: auto;
-        bottom: 0;
-        background-color: var(--secondary-color);
-        max-width: 100%;
-        display:flex;
-        margin: 0px;
-        width: 100%;
-        align-items: center;
-        justify-content: center;
-        font-size: large;
-    }
-    .time{margin: 5px}
-    .site-links{
-        flex-direction: row;
-    }
-    .site-links > a, .site-links>button{
-       font-size:x-large; 
-    }
-    .site-nav-bar-hr{display: none !important;}
-    .site-nav-bar-vr{
-        display: block !important; 
-    }
-}
+
 .site-nav-bar-hr{display: block;}
 .site-nav-bar-vr{
         display: none;
@@ -416,3 +380,44 @@ h1,h2,h3,h4,p
     border-radius: 30px;
 }
 
+
+/*MEDIAQUERRTY*/
+
+
+@media screen and (max-width: 900px) {
+    .feed-container {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
+    .feed-nav{
+        position: relative !important;
+        top: 0 !important;
+        flex-direction: row !important;
+        margin: 10px 10px !important;
+        width: auto !important;
+    }
+    .site-nav {
+        position:fixed;
+        top: auto;
+        bottom: 0;
+        background-color: var(--secondary-color);
+        max-width: 100%;
+        display:flex;
+        margin: 0px;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        font-size: large;
+    }
+    .time{margin: 5px}
+    .site-links{
+        flex-direction: row;
+    }
+    .site-links > a, .site-links>button{
+       font-size:x-large; 
+    }
+    .site-nav-bar-hr{display: none !important;}
+    .site-nav-bar-vr{
+        display: block !important; 
+    }
+}
