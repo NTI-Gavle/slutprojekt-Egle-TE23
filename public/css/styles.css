@@ -147,8 +147,7 @@ h1,h2,h3,h4,p
     opacity: 1;
     border: solid var(--secondary-text-color) 1px;
 }
-.site-nav ul {
-    list-style: none;
+.site-links {
     display: flex;
     flex-direction: column;
     align-items: end;
@@ -190,9 +189,52 @@ h1,h2,h3,h4,p
 }
 /*Feed*/
 .feed-container{
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto minmax(500px, 700px) auto;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0px auto;
 }
+@media screen and (max-width: 900px) {
+    .feed-container {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+    }
+    .feed-nav{
+        top: 10 !important;
+        flex-direction: row !important;
+        margin: 10px 0 !important;
+        width: 100% !important;
+    }
+    .site-nav {
+        position:fixed;
+        top: auto;
+        bottom: 0;
+        background-color: var(--secondary-color);
+        max-width: 100%;
+        display:flex;
+        margin: 0px;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        font-size: large;
+    }
+    .time{margin: 5px}
+    .site-links{
+        flex-direction: row;
+    }
+    .site-links > a, .site-links>button{
+       font-size:x-large; 
+    }
+    .site-nav-bar-hr{display: none !important;}
+    .site-nav-bar-vr{
+        display: block !important; 
+    }
+}
+.site-nav-bar-hr{display: block;}
+.site-nav-bar-vr{
+        display: none;
+    }
 .feed{
     margin: 10px 0px;
     flex-direction: column;
@@ -202,13 +244,14 @@ h1,h2,h3,h4,p
     text-align: center;
 }
 .feed-nav{
-    position: sticky !important;
+    position: sticky ;
     top: 130px;
     display: flex;
     flex-direction: column;
     background-color: var(--secondary-color);
     border: 1px solid var(--secondary-text-color);
     border-radius: 20px;
+    gap: 10px; 
     padding: 20px;
     margin: 30px;
     margin-left: 20px;
@@ -318,6 +361,7 @@ h1,h2,h3,h4,p
 
 /*Login Sighnup*/
 #login-container{
+    
     background-color: var(--primary-color);
     margin: 100px;
     border-radius: 20px;

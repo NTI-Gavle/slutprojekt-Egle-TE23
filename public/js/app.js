@@ -1,9 +1,9 @@
 window.onscroll = function() {scrollFunction()};
 
 function scrollFunction() {
-if (this.oldScroll > this.scrollY) {
+if (this.oldScroll > this.scrollY ) {
     document.querySelector("header").style.transform = "translateY(0px)"; 
-} else {
+}else {
     document.querySelector("header").style.transform = "translateY(-100px)";
 }
 this.oldScroll = this.scrollY; 
