@@ -1,11 +1,7 @@
 <?php
 $pageTitle = "Profile"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
-?>
-<div class="feed-container">
-<?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
-<?php 
 include('../private/dbconnection.php');
 
 $sql = "SELECT * FROM users WHERE Username =?";
@@ -20,13 +16,17 @@ $data = array($_SESSION["user_id"]);
 $stmt->execute($data);
 $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$sql = "SELECT id FROM posts WHERE UserId =?";
+$sql = "SELECT * FROM posts WHERE UserId = ? ORDER BY CreatedAt DESC LIMIT 50";;
 $stmt = $dbconn->prepare($sql);
 $data = array($_SESSION["user_id"]);
 $stmt->execute($data);
-$posts = $stmt->fetch(PDO::FETCH_ASSOC);
+$posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
+
+<div class="feed-container">
+
+<?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
 <div class="feed">
     <div class="post-container">
@@ -58,38 +58,35 @@ $posts = $stmt->fetch(PDO::FETCH_ASSOC);
         </div>
     </div>
     <div class="post-feed">
-        <?php 
-        foreach($posts as $post){
-            echo('
-                <div class="post-container">
-            <div class="post-header">
-                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
-                <span class="post-username">Username</span>
-            </div>
-         
-            <div class="post-content">
-                <p>post text</p>
-            </div>
-            <div class="post-button-container">
-                <div>
-                    <btn class="btn btn-icon">Like</btn>
-                    <btn class="btn btn-icon">Dislike</btn>
-                    <btn class="btn btn-icon">Comment</btn>  
-                </div>
-                <div>
-                    <btn class="btn btn-icon">Star</btn>
-                    <btn class="btn btn-icon">Send</btn>
-                </div>  
-            </div>
-        </div>');};
-        ?>
+<?php foreach($posts as $post): ?>
+    <div class="post-container">
+        <div class="post-header">
+            <img src="<?= htmlspecialchars($profile["ProfilePicture"]) ?>" class="post-profile-pic">
+            <span class="post-username"><?= htmlspecialchars($profile["Nickname"]) ?></span>
+        </div>
 
+        <div class="post-content">
+            <p><?= htmlspecialchars($post["Text"]) ?></p>
+        </div>
+
+        <div class="post-button-container">
+            <div>
+                <button class="btn btn-icon">Like</button>
+                <button class="btn btn-icon">Dislike</button>
+                <button class="btn btn-icon">Comment</button>  
+            </div>
+            <div>
+                <button class="btn btn-icon">Star</button>
+                <button class="btn btn-icon">Send</button>
+            </div>  
+        </div>
     </div>
+<?php endforeach; ?>
+</div>
 </div>
 
 <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 
 </div>
 
-<?php
-require_once __DIR__ . '/../includes/footer.php';
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
