@@ -5,26 +5,49 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="feed-container">
 <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
+<?php 
+include('../private/dbconnection.php');
+
+$sql = "SELECT * FROM users WHERE Username =?";
+$stmt = $dbconn->prepare($sql);
+$data = array($_SESSION["username"]);
+$stmt->execute($data);
+$res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$sql = "SELECT * FROM userprofiles WHERE UserId =?";
+$stmt = $dbconn->prepare($sql);
+$data = array($_SESSION["user_id"]);
+$stmt->execute($data);
+$profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$sql = "SELECT id FROM posts WHERE UserId =?";
+$stmt = $dbconn->prepare($sql);
+$data = array($_SESSION["user_id"]);
+$stmt->execute($data);
+$posts = $stmt->fetch(PDO::FETCH_ASSOC);
+
+?>
+
 <div class="feed">
     <div class="post-container">
         <div class="post-header">
-                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
-                <span class="post-username">Username</span>
+                <img src=<?php echo(htmlspecialchars($profile["ProfilePicture"]))?> alt="profile picture" class="post-profile-pic">
+                <span class="post-username"><?php echo(htmlspecialchars($res["Username"]))?></span>
         </div>
         <div class="profile-container">
             <div class="profile-background-container">
-                <img src="Images\placeholder_1.png" alt="profile-background" class="profile-background">
+                <img src=<?php echo(htmlspecialchars($profile["ProfilePicture"]))?> alt="profile-background" class="profile-background">
             </div>
-            <img src="Images\placeholder_3.png" alt="profile picture" class="profile-pic">
+            <img src=<?php echo(htmlspecialchars($profile["ProfilePicture"]))?> alt="profile picture" class="profile-pic">
             <div class="profile-name">
                 <div>
-                    <p>Name</p>
-                    <p>@username</p>
+                    <p><?php echo(htmlspecialchars($profile["Nickname"]))?></p>
+                    <p>@<?php  echo(htmlspecialchars($res["Username"]))?></p>
                 </div>
                 <button class="btn btn-secondary btn-sm">&ltedit&gt</button>   
             </div>
             <div class="profile-description">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et dignissim odio. Nunc ullamcorper lacus ac arcu faucibus, a maximus tellus interdum. Aliquam placerat nulla pretium nulla congue, gravida suscipit sapien ultrices. Curabitur tincidunt rutrum odio, vel ullamcorper sem lacinia quis. Fusce eget leo quis velit rhoncus rhoncus sed venenatis elit. </p>
+                <p><?php echo(htmlspecialchars($profile["Description"]))?></p>
             </div>
             <div class="profile-stats">
 
@@ -35,7 +58,10 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
     <div class="post-feed">
-        <div class="post-container">
+        <?php 
+        foreach($posts as $post){
+            echo('
+                <div class="post-container">
             <div class="post-header">
                 <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
                 <span class="post-username">Username</span>
@@ -55,53 +81,9 @@ require_once __DIR__ . '/../includes/header.php';
                     <btn class="btn btn-icon">Send</btn>
                 </div>  
             </div>
-        </div>
-        <div class="post-container">
-            <div class="post-header">
-                <img src="Images\placeholder_1.png" alt="profile picture" class="post-profile-pic">
-                <span class="post-username">Username</span>
-            </div>
-            <div class="post-content">
-                <p>Wow i sure am enjoying this image letly. thought id share it with everyone and yeah. Well i guess theres a lot to be said about it but i relly just cant think of the words. it really is crazy how cool it is</p>
-            </div>
-            <div class="post-button-container">
-                <div>
-                    <btn class="btn btn-icon">Like</btn>
-                    <btn class="btn btn-icon">Dislike</btn>
-                    <btn class="btn btn-icon">Comment</btn>  
-                </div>
-                <div>
-                    <btn class="btn btn-icon">Star</btn>
-                    <btn class="btn btn-icon">Send</btn>
-                </div>  
-            </div>
-        </div>
-        <div class="post-container">
-            <div class="post-header">
-                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
-                <span class="post-username">Username</span>
-            </div>
-            <div class="post-content">
-                <p>post text</p>
-                <div class="post-img-container">
-                    <img src="Images\placeholder_2.jpg" alt="img" class="img-fluid">
-                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
-                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
-                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
-                </div>
-            </div>
-            <div class="post-button-container">
-                <div>
-                    <btn class="btn btn-icon">Like</btn>
-                    <btn class="btn btn-icon">Dislike</btn>
-                    <btn class="btn btn-icon">Comment</btn>  
-                </div>
-                <div>
-                    <btn class="btn btn-icon">Star</btn>
-                    <btn class="btn btn-icon">Send</btn>
-                </div>  
-            </div>
-        </div>
+        </div>');};
+        ?>
+
     </div>
 </div>
 

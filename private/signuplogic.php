@@ -72,6 +72,22 @@ $stmt = $dbconn->prepare($sql);
 $data = array($email, $user, password_hash($pass, PASSWORD_DEFAULT), $now);
 $stmt->execute($data);
 
+$sql = "SELECT * FROM users WHERE Username =?";
+$stmt = $dbconn->prepare($sql);
+$data = array($user);
+$stmt->execute($data);
+$res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$sql = "INSERT INTO userprofiles (UserId,Nickname,Description,ProfilePicture) VALUES (?,?,?,?)";
+$stmt = $dbconn->prepare($sql);
+$data = array($res["id"], $user,"","Images/Skärmbild 2026-03-09 142605.png");
+$stmt->execute($data);
+
+$sql = "INSERT INTO usersettings (UserId) VALUES (?)";
+$stmt = $dbconn->prepare($sql);
+$data = array($res["id"]);
+$stmt->execute($data);
+
 $_SESSION["signupError"] = "User resistration succes!";
 
 header("Location: ../public/signup.php");

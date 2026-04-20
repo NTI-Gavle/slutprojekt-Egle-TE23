@@ -1,5 +1,10 @@
 <?php
 include '../private/dbconnection.php';
+
+if(session_status() !== PHP_SESSION_ACTIVE)
+{
+    session_start();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" > <!--place dark mode class here to scrollbar also has dark mode-->
