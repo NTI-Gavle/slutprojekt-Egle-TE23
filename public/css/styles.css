@@ -337,7 +337,25 @@ h1,h2,h3,h4,p
     margin: 10px auto;
 }
 
-/*OCNTACT*/
+/*Settings*/
+.settings-container{
+    display: grid;
+    grid-template-columns:max-content auto;
+    padding: 20px;
+    gap: 10px;
+}
+.settings-field{
+    background-color: var(--primary-color);
+    color: var(--post-text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 22px;
+    padding: 20px;
+}
+.settings-list{
+    list-style: none;
+}
+
+/*CONTACT*/
 .contact-form{
     padding: 10px 50px;
     display: flex;

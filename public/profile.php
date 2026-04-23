@@ -4,6 +4,10 @@ require_once __DIR__ . '/../includes/header.php';
 
 include('../private/dbconnection.php');
 
+if(!$_SESSION["username"]){
+    header("Location: ../public/login.php");
+}
+
 $sql = "SELECT * FROM users WHERE Username =?";
 $stmt = $dbconn->prepare($sql);
 $data = array($_SESSION["username"]);

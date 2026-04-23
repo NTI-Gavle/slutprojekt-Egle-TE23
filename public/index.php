@@ -16,7 +16,7 @@ $data = array($_SESSION["user_id"]);
 $stmt->execute($data);
 $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$sql = "SELECT * FROM posts ORDER BY CreatedAt DESC LIMIT 50";;
+$sql = "SELECT * FROM posts ORDER BY CreatedAt DESC LIMIT 50";
 $stmt = $dbconn->prepare($sql);
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
