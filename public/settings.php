@@ -21,21 +21,48 @@ $stmt->execute($data);
 $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
 ?>
+<script defer src="js/settings.js"></script>
+
 <div class="settings-container">
     <nav class="settings-nav settings-field">
         <h1>Settings</h1>
         <ul class="settings-list">
-            <li><button class="btn btn-secondary">&ltgeneral&gt</button></li>
-            <li><button class="btn btn-secondary">&ltaccount&gt</button></li>
-            <li><button class="btn btn-secondary">&ltabout us&gt</button></li>
-            <li><button class="btn btn-secondary">&ltlogout&gt</button></li>
+            <li><button onclick="ShowSettings('settings-general')" class="btn btn-secondary">&ltgeneral&gt</button></li>
+            <li><button onclick="ShowSettings('settings-account')"class="btn btn-secondary">&ltaccount&gt</button></li>
+            <li><button onclick="ShowSettings('settings-about')" class="btn btn-secondary">&ltabout us&gt</button></li>
+            <li><a href="logout.php" class="btn btn-secondary">&ltlogout&gt</a></li>
         </ul>
     </nav>
     <div class="settings-display settings-field">
-        <h1>title</h1>
-        <div>
-            insert settings here <br>
-            or here
+        <div id="settings-general">
+            <h1 >General</h1>
+            <div>
+                <div>Theme</div>
+                <div>Time zone</div>
+                <div>Clouds</div>
+                <div>Animated background</div>
+                <div>Notifications</div>
+                <div>Mentions</div>
+            </div>
+        </div>    
+        <div id="settings-account">
+            <h1>Account</h1>
+            <div>
+                <div>Profile picture</div>
+                <div>Profile banner</div>
+                <div>Username</div>
+                <div>Nickname</div>
+                <div>Description</div>
+                <div>Email</div>
+                <div>Password</div>
+                <div>Birthday</div>
+            </div>
+        </div>
+        <div id="settings-about">
+            <h1>About us</h1>
+            <div>
+                <p>Hiiiii my name is me! i make this website and uhhh ye!</p>
+            </div>
         </div>
     </div>
 </div>
