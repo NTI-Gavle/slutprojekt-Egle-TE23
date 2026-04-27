@@ -1,69 +1,50 @@
 <?php
 $pageTitle = "Home"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
+
+$conversationId = $_GET['conversation'] ?? null;
+$messages = [];
+
+if ($conversationId) 
+{
+    $sql = "SELECT * FROM messages WHERE ConversationId = ? ORDER BY TimeSent ASC";
+    $stmt = $dbconn->prepare($sql);
+    $stmt->execute([$conversationId]);
+    $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 
-<div class="feed-container">
-<div class="feed">
-    <h1>&ltdiscorver&gt</h1>
-    <div class="post-feed">
-        <div class="post-container">
-            <div class="post-header">
-                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
-                <span class="post-username">Username</span>
-            </div>
-            chat
-        </div>
-        <div class="post-container">
-            <div class="post-header">
-                <img src="Images\placeholder_1.png" alt="profile picture" class="post-profile-pic">
-                <span class="post-username">Username</span>
-            </div>
-            <div class="post-content">
-                <p>Wow i sure am enjoying this image letly. thought id share it with everyone and yeah. Well i guess theres a lot to be said about it but i relly just cant think of the words. it really is crazy how cool it is</p>
-            </div>
-            <div class="post-button-container">
-                <div>
-                    <btn class="btn btn-icon">Like</btn>
-                    <btn class="btn btn-icon">Dislike</btn>
-                    <btn class="btn btn-icon">Comment</btn>  
-                </div>
-                <div>
-                    <btn class="btn btn-icon">Star</btn>
-                    <btn class="btn btn-icon">Send</btn>
-                </div>  
-            </div>
-        </div>
-        <div class="post-container">
-            <div class="post-header">
-                <img src="Images\placeholder_3.png" alt="profile picture" class="post-profile-pic">
-                <span class="post-username">Username</span>
-            </div>
-            <div class="post-content">
-                <p>post text</p>
-                <div class="post-img-container">
-                    <img src="Images\placeholder_2.jpg" alt="img" class="img-fluid">
-                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
-                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
-                    <img src="Images\placeholder_1.png" alt="img" class="img-fluid">
-                </div>
-            </div>
-            <div class="post-button-container">
-                <div>
-                    <btn class="btn btn-icon">Like</btn>
-                    <btn class="btn btn-icon">Dislike</btn>
-                    <btn class="btn btn-icon">Comment</btn>  
-                </div>
-                <div>
-                    <btn class="btn btn-icon">Star</btn>
-                    <btn class="btn btn-icon">Send</btn>
-                </div>  
-            </div>
-        </div>
+<div class="contacts-container">
+<?php
+    $sql = "SELECT DISTINCT ConversationId FROM messages WHERE SenderId = ? OR ReceiverId = ?";
+    $stmt = $dbconn->prepare($sql);
+    $stmt->execute([$_SESSION['user_id'], $_SESSION['user_id']]);
+    $conversations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+    <?php foreach($conversations as $conv): ?>
+        <a href="?conversation=<?= $conv['ConversationId'] ?>">
+            Conversation <?= $conv['ConversationId'] ?>
+        </a>
+    <?php endforeach; ?>
+</div>
+
+<div class="chat-container">
+<?php if (!$conversationId): ?>
+    <div class="no-chat">
+        <p>Select a conversation to start chatting</p>
     </div>
+<?php else: ?>
+    
+    <?php foreach($messages as $msg): ?>
+        <div class="message <?= $msg['SenderId'] == $_SESSION['user_id'] ? 'sent' : 'received' ?>">
+            <p><?= htmlspecialchars($msg['Text']) ?></p>
+        </div>
+    <?php endforeach; ?>
+
+<?php endif; ?>
 </div>
-  <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
-</div>
+
+<?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 
 <?php
 require_once __DIR__ . '/../includes/footer.php';

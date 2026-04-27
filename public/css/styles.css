@@ -363,6 +363,24 @@ h1,h2,h3,h4,p
     flex-direction: column;
     gap:10px;
 }
+
+/*CHAT*/
+.container{
+     background-color: var(--primary-color);
+    color: var(--post-text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 22px;
+    padding: 20px;
+}
+.contacts-container{
+background-color: red;
+
+}
+.chat-container{
+    background-color: red;
+}
+
+
 /*Buttons*/
 .btn-primary{
     background-color: var(--primary-color);
@@ -398,10 +416,7 @@ h1,h2,h3,h4,p
     border-radius: 30px;
 }
 
-
 /*MEDIAQUERRTY*/
-
-
 @media screen and (max-width: 900px) {
     .feed-container {
         grid-template-columns: 1fr;
