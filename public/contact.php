@@ -34,36 +34,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<div id="login-container">
-<form action="contact.php" method="post" class="login-form">
-    <div class="post-header">
+<div class="p-container m-5">
+<form action="contact.php" method="post">
+    <div class="p-header">
         <h1>CONTACT ME!</h1>
     </div>  
-    <div class="login-content">
-            <div class="form-group">
-    <label for="name">Name:</label>
-    <input class="form-control" type="text" name="name" id="name" value="<?= htmlspecialchars($name) ?>">
+    <div class="p-content">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input class="form-control" type="text" name="name" id="name" placeholder="Name" value="<?= htmlspecialchars($name) ?>">
+        </div> 
+         <div class="form-group">
+            <label for="email">Email</label>
+            <input class="form-control" type="email" name="email" id="email" placeholder="Email" value="<?= htmlspecialchars($email) ?>">
+        </div>
+        <div class="form-group">
+            <label for="message">Message</label>
+            <textarea class="form-control" name="message" placeholder="I want to report an issiue..." id="message"><?= htmlspecialchars($message) ?></textarea>
 
-    <label for="email">Email:</label>
-    <input class="form-control" type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>">
+            <?php if ($success): ?>
+                <p class="success-message">Thank you! Your message has been sent.</p>
+            <?php endif; ?>
 
-    <label for="message">Message:</label>
-    <textarea class="form-control" name="message" id="message"><?= htmlspecialchars($message) ?></textarea>
+            <?php if ($errors): ?>
+                <ul class="error-messages">
+                    <?php foreach ($errors as $error): ?>
+                        <li><?= htmlspecialchars($error) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-secondary">Send</button>
+        </div>
 
-    <?php if ($success): ?>
-        <p class="success-message">Thank you! Your message has been sent.</p>
-    <?php endif; ?>
-
-    <?php if ($errors): ?>
-        <ul class="error-messages">
-            <?php foreach ($errors as $error): ?>
-                <li><?= htmlspecialchars($error) ?></li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-
-    <button type="submit" class="btn btn-secondary">Send</button>
-    </div> 
     </div> 
 </form>
 </div>

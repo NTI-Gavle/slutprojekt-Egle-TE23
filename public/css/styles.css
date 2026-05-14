@@ -323,20 +323,6 @@ h1,h2,h3,h4,p
     padding: 40px;
 }
 
-/*Login Sighnup*/
-#login-container{
-    
-    background-color: var(--primary-color);
-    margin: 100px;
-    border-radius: 20px;
-}
-.login-content{
-    padding: 20px;
-}
-.login-button{
-    margin: 10px auto;
-}
-
 /*Settings*/
 .settings-container{
     display: grid;
@@ -355,31 +341,27 @@ h1,h2,h3,h4,p
     list-style: none;
 }
 
-/*CONTACT*/
-.contact-form{
-    padding: 10px 50px;
-    display: flex;
-    flex-wrap:wrap;
-    flex-direction: column;
-    gap:10px;
-}
-
-/*CHAT*/
-.container{
-     background-color: var(--primary-color);
+/*General*/
+.p-container{
+    background-color: var(--primary-color);
     color: var(--post-text-color);
     border: 2px solid var(--border-color);
-    border-radius: 22px;
+    border-radius: 23px;
+}
+.p-header{
+    background-color: var(--secondary-color);
+    color: var(--secondary-text-color);
+    display: flex;
+    gap: 15px;
+    padding: 10px 15px;
+    border-radius: 20px;
+}
+.p-content{
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
-.contacts-container{
-background-color: rgb(38, 0, 255);
-
-}
-.chat-container{
-    background-color: rgb(38, 0, 255);
-}
-
 
 /*Buttons*/
 .btn-primary{
