@@ -1,9 +1,9 @@
-ShowSettings("settings-general");
+ShowSettings("account");
 
 function ShowSettings(string){
-  document.getElementById('settings-general').style.display="none";
-  document.getElementById('settings-account').style.display="none";
-  document.getElementById('settings-about').style.display="none";
+  document.getElementById('general').style.display="none";
+  document.getElementById('account').style.display="none";
+  document.getElementById('about').style.display="none";
   const page = document.getElementById(string);
-  page.style.display="block";
+  page.style.display="flex";
 }

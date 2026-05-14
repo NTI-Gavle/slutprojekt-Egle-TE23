@@ -340,6 +340,15 @@ h1,h2,h3,h4,p
 .settings-list{
     list-style: none;
 }
+.settings-list>li{
+    margin-bottom: 10px;
+}
+
+.settings-section{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
 /*General*/
 .p-container{
@@ -361,6 +370,14 @@ h1,h2,h3,h4,p
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+.alert{
+    text-align: center;
+}
+.alert-success{
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--white);
 }
 
 /*Buttons*/
@@ -396,6 +413,9 @@ h1,h2,h3,h4,p
     padding: 10px 20px;
     height: fit-content;
     border-radius: 30px;
+}
+.btn-pill{
+    border-radius: 20px;
 }
 
 /*MEDIAQUERRTY*/

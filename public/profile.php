@@ -35,20 +35,20 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <div class="feed">
     <div class="post-container">
         <div class="post-header">
-                <img src=<?php echo(htmlspecialchars($profile["ProfilePicture"]))?> alt="profile picture" class="post-profile-pic">
+                <img src=<?php echo("../uploads/pfp/".htmlspecialchars($profile["ProfilePicture"]))?> alt="profile picture" class="post-profile-pic">
                 <span class="post-username"><?php echo(htmlspecialchars($res["Username"]))?></span>
         </div>
         <div class="profile-container">
             <div class="profile-background-container">
-                <img src=<?php echo(htmlspecialchars($profile["ProfilePicture"]))?> alt="profile-background" class="profile-background">
+                <img src=<?php echo("../uploads/banner/".htmlspecialchars($profile["Banner"]))?> alt="profile-background" class="profile-background">
             </div>
-            <img src=<?php echo(htmlspecialchars($profile["ProfilePicture"]))?> alt="profile picture" class="profile-pic">
+            <img src=<?php echo("../uploads/pfp/".htmlspecialchars($profile["ProfilePicture"]))?> alt="profile picture" class="profile-pic">
             <div class="profile-name">
                 <div>
                     <p><?php echo(htmlspecialchars($profile["Nickname"]))?></p>
                     <p>@<?php  echo(htmlspecialchars($res["Username"]))?></p>
                 </div>
-                <button class="btn btn-secondary btn-sm">&ltedit&gt</button>   
+                <a class="btn btn-secondary btn-sm" href="settings.php">&ltedit&gt</a>   
             </div>
             <div class="profile-description">
                 <p><?php echo(htmlspecialchars($profile["Description"]))?></p>

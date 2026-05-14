@@ -4,17 +4,19 @@ require_once __DIR__ . '/../includes/header.php';
 
 include('../private/dbconnection.php');
 
-$sql = "SELECT * FROM users WHERE Username =?";
-$stmt = $dbconn->prepare($sql);
-$data = array($_SESSION["username"]);
-$stmt->execute($data);
-$res = $stmt->fetch(PDO::FETCH_ASSOC);
+if(isset($_SESSION["user_id"])){
+    $sql = "SELECT * FROM users WHERE Id =?";
+    $stmt = $dbconn->prepare($sql);
+    $data = array($_SESSION["user_id"]);
+    $stmt->execute($data);
+    $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$sql = "SELECT * FROM userprofiles WHERE UserId =?";
-$stmt = $dbconn->prepare($sql);
-$data = array($_SESSION["user_id"]);
-$stmt->execute($data);
-$profile = $stmt->fetch(PDO::FETCH_ASSOC);
+    $sql = "SELECT * FROM userprofiles WHERE UserId =?";
+    $stmt = $dbconn->prepare($sql);
+    $data = array($_SESSION["user_id"]);
+    $stmt->execute($data);
+    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
 $sql = "SELECT * FROM posts ORDER BY CreatedAt DESC LIMIT 50";
 $stmt = $dbconn->prepare($sql);
@@ -23,12 +25,12 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div id="create-post-popout">
-    <div class="post-container create-post-container">
-            <div class="post-header">
+    <div class="p-container create-post-container">
+            <div class="p-header">
                 <button onclick="CloseCreatePost()" class="btn btn-icon">X</button>
-                <span class="post-username"><?php echo(htmlspecialchars($profile["Nickname"]))?></span>
+                <span class="post-username"><?php if($profile["Nickname"]) echo(htmlspecialchars($profile["Nickname"]))?></span>
             </div>
-            <div class="post-content">
+            <div class="p-content">
                 <form action="../private/create-post.php" method="post">
                     <div class="form-group">
                         <textarea type="text" maxlength="500" name="create-post-text" id="create-post-text" class="form-control" placeholder="tell the world something!"></textarea>
