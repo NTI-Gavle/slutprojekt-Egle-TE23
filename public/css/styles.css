@@ -379,6 +379,9 @@ h1,h2,h3,h4,p
     border-color: var(--accent-color);
     color: var(--white);
 }
+.no-underline{
+    text-decoration: none;
+}
 
 /*Buttons*/
 .btn-primary{
