@@ -4,6 +4,50 @@ require_once __DIR__ . '/../includes/header.php';
 
 include('../private/dbconnection.php');
 
+$feed = $_GET['feed'] ?? 'discover';
+unset($stmt);
+switch ($feed) {
+    case 'new':
+        $sql = "SELECT posts.*, userprofiles.Nickname, userprofiles.ProfilePicture
+        FROM posts
+        JOIN userprofiles ON posts.UserId = userprofiles.UserId
+        ORDER BY posts.CreatedAt DESC
+        LIMIT 50";
+        break;
+
+    case 'top':
+        $sql = "SELECT posts.*, userprofiles.Nickname, userprofiles.ProfilePicture
+        FROM posts
+        JOIN userprofiles ON posts.UserId = userprofiles.UserId
+        ORDER BY posts.LikeCount DESC
+        LIMIT 50";
+        break;
+
+    case 'following':
+        $sql = "SELECT posts.*, userprofiles.Nickname, userprofiles.ProfilePicture
+        FROM posts
+        JOIN userprofiles ON posts.UserId = userprofiles.UserId
+        WHERE posts.UserId IN ( SELECT FollowedUserId FROM followingrelationships WHERE UserId = ?)
+        ORDER BY posts.CreatedAt DESC
+        LIMIT 50";
+        $stmt = $dbconn->prepare($sql);
+        $stmt->execute([$_SESSION['user_id']]);
+        break;
+
+    default: //discover
+        $sql = "SELECT posts.*, userprofiles.Nickname, userprofiles.ProfilePicture
+        FROM posts
+        JOIN userprofiles ON posts.UserId = userprofiles.UserId
+        ORDER BY RAND()
+        LIMIT 50";
+        break;
+}
+if(!isset($stmt)){
+    $stmt = $dbconn->prepare($sql);
+    $stmt->execute();
+}
+$posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 if(isset($_SESSION["user_id"])){
     $sql = "SELECT * FROM users WHERE Id =?";
     $stmt = $dbconn->prepare($sql);
@@ -17,18 +61,14 @@ if(isset($_SESSION["user_id"])){
     $stmt->execute($data);
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 }
-
-$sql = "SELECT * FROM posts ORDER BY CreatedAt DESC LIMIT 50";
-$stmt = $dbconn->prepare($sql);
-$posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 
+<?php if(isset($_SESSION["user_id"])):?>
 <div id="create-post-popout">
     <div class="p-container create-post-container">
             <div class="p-header">
                 <button onclick="CloseCreatePost()" class="btn btn-icon">X</button>
-                <span class="post-username"><?php if($profile["Nickname"]) echo(htmlspecialchars($profile["Nickname"]))?></span>
+                <span class="post-username"><?=htmlspecialchars($profile["Nickname"])?></span>
             </div>
             <div class="p-content">
                 <form action="../private/create-post.php" method="post">
@@ -37,8 +77,8 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <div class="post-button-container">
                 <div>
-                    <btn class="btn btn-icon">Image</btn>
-                    <btn class="btn btn-icon">Emoji</btn> 
+                    <button class="btn btn-icon">Image</button>
+                    <button class="btn btn-icon">Emoji</button> 
                 </div>
                 <div>
                     <input type="submit" class="btn btn-secondary" value="Post">
@@ -48,25 +88,18 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 </div>
+<?php endif; ?>
 
 <div class="feed-container">
 <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 <div class="feed">
-    <h1>&ltdiscorver&gt</h1>
-
+    <h1>&lt<?= htmlspecialchars($feed) ?>&gt</h1>
      <div class="post-feed">
-        <?php foreach($posts as $post): 
-            
-            $sql = "SELECT * FROM userprofiles WHERE UserId =?";
-            $stmt = $dbconn->prepare($sql);
-            $data = array($post["UserId"]);
-            $stmt->execute($data);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            ?>
+        <?php foreach($posts as $post): ?>
             <div class="post-container">
                 <div class="post-header">
-                    <img src="<?= htmlspecialchars($user["ProfilePicture"]) ?>" class="post-profile-pic">
-                    <span class="post-username"><?= htmlspecialchars($user["Nickname"]) ?></span>
+                    <img src="<?= htmlspecialchars($post["ProfilePicture"]) ?>" class="post-profile-pic">
+                    <span class="post-username"><?= htmlspecialchars($post["Nickname"]) ?></span>
                 </div>
 
                 <div class="post-content">
