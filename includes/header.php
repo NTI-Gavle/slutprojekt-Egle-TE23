@@ -33,7 +33,7 @@ if(session_status() !== PHP_SESSION_ACTIVE)
                 <a href="index.php">LO-GO</a>
             </h1>
             <div id="search-bar">
-                <form action="search.php" method="post">
+                <form action="../public/search.php" method="post">
                     <input type="text" name="search" id="search-field" placeholder="search...">
                 </form>
                 <button class="btn btn-icon">

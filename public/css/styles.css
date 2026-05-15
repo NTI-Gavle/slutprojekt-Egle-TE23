@@ -122,6 +122,25 @@ h1,h2,h3,h4,p
 #search-field::placeholder{
     color: var(--text-midtone-color);
 }
+.search-form { width: 100%; }
+
+.search-term-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.search-user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--post-text-color);
+}
+.search-user-row:hover { opacity: 0.8; }
+ 
 
 /* Footer */
 .site-footer {
@@ -234,6 +253,70 @@ h1,h2,h3,h4,p
     width: 100%;
 }
 
+/*Views*/
+.post-views {
+    margin-left: auto;
+    font-size: 0.75em;
+    opacity: 0.6;
+    align-self: center;
+}
+ 
+/*Comment popup*/
+.comment-preview {
+    background-color: var(--secondary-color);
+    color: var(--secondary-text-color);
+    border-radius: 10px;
+    padding: 10px 15px;
+    opacity: 0.8;
+    font-size: 0.9em;
+    max-height: 80px;
+    overflow: hidden;
+}
+.comments-list {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.comment-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background-color: var(--secondary-color);
+    border-radius: 12px;
+    padding: 8px 12px;
+    color: var(--secondary-text-color);
+}
+.comment-item p {
+    margin: 2px 0 0;
+    font-size: 0.9em;
+}
+ 
+/* Send popout */
+.send-options {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+.follow-send-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.follow-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.follow-item span { flex: 1; }
+
 /*Post*/
 .post-feed{
     padding: 0px 10px;
@@ -293,7 +376,7 @@ h1,h2,h3,h4,p
     grid-template-columns: 280px 1fr auto;
     height: calc(100vh - 120px);
     max-width: 1200px;
-    margin: 20px auto;
+    margin: 20px 10px;
     gap: 10px;
 }
 .chat-sidebar {
@@ -431,7 +514,7 @@ h1,h2,h3,h4,p
 }
 .modal-box {
     width: min(90vw, 480px);
-    max-height: 80vh;
+    max-height: 95vh;
     overflow-y: auto;
 }
 
@@ -508,6 +591,7 @@ h1,h2,h3,h4,p
     background-color: var(--secondary-color);
     color: var(--secondary-text-color);
     display: flex;
+    justify-content: space-between;
     gap: 15px;
     padding: 10px 15px;
     border-radius: 20px;
@@ -604,5 +688,19 @@ h1,h2,h3,h4,p
     .site-nav-bar-hr{display: none !important;}
     .site-nav-bar-vr{
         display: block !important; 
+    }
+    /*chat*/
+    .chat-page-container {
+    grid-template-columns: 1fr;
+    height: auto;
+    }
+    .chat-sidebar {
+        margin: auto 10px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .chat-main {
+        margin: auto 10px;
+        height: 60vh;
     }
 }

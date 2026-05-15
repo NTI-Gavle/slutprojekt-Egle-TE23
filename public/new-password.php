@@ -1,6 +1,7 @@
 <?php
-include 'dbconnection.php';
+include '../private/dbconnection.php';
 session_start();
+
 if (!isset($_POST['token'], $_POST['password'], $_POST['confirm'])) {
     $_SESSION['loginError'] = "Invalid request.";
     header("Location: login.php");
@@ -29,25 +30,26 @@ $stmt->execute([$hash, $token, $now]);
 if ($stmt->rowCount() === 0) {
     die("Reset token expired.");
 }
+$pageTitle = "Reset Password"; 
+require_once __DIR__ . '/../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <?php include("scripts-links.php") ?>
-</head>
 
 <body>
-    <?php
-    include("header.php");
-    ?>
-    <div style="margin:50px;">
-        <form action="loginlogic.php" method="post" class="login-form">
-            <h3 style="color:blueviolet; width: fit-content;" class="m-auto ">Password updated. You can now log in.</h3>
-            <button type="submit" class="btn btn-primary login-button">Login</button>
+    <div class="p-container m-5">
+        <form action="login.php" method="post" class="p-form">
+            <div class="p-header">
+                <h1>PASSWORD RESET!</h1>
+            </div>
+            <div class="p-content">
+                <div class="form-group">
+                    <p>Password updated. You can now log in.</p>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-secondary login-button">&ltLogin&gt</button>
+                </div>
+        
+    </div>
+    </form>
     </div>
 </body>
 
