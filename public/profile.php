@@ -4,8 +4,9 @@ require_once __DIR__ . '/../includes/header.php';
 
 include('../private/dbconnection.php');
 
-if(!$_SESSION["username"]){
-    header("Location: ../public/login.php");
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login.php");
+    exit;
 }
 
 $sql = "SELECT * FROM users WHERE Username =?";

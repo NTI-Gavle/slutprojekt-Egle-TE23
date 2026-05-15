@@ -10,12 +10,12 @@ $pageTitle = "Home"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-    <div id="login-container">
-    <form action="../private/signuplogic.php" method="post" class="login-form">
-    <div class="post-header">
+<div class="p-container m-5 mt-2">
+    <form action="../private/signuplogic.php" method="post" class="p-form">
+    <div class="p-header">
         <h1>LOGIN</h1>
     </div>    
-    <div class="login-content">
+    <div class="p-content">
           <div class="form-group">
                 <label for="passwordConfirm">Email</label>
                 <input type="email" class="form-control" id="email" name="email" placeholder="Email address"
@@ -47,11 +47,11 @@ require_once __DIR__ . '/../includes/header.php';
         }
         ?>
             
-        <button type="submit" class="btn btn-secondary login-button">&ltSignup&gt</button>
+        <div class="form-group"><button type="submit" class="btn btn-secondary login-button">&ltSignup&gt</button></div>
         <div><a href="login.php" class="link-p">login instead</a></div>
     </div>
     </form>
     </div>
 </body>
 
-</html>
+<?php require_once __DIR__ . '/../includes/footer.php';

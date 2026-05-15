@@ -33,8 +33,11 @@ switch ($feed) {
         LIMIT 50";
         break;
 
-    case 'following':
-        header("Location: ../public/login.php");
+    case 'following':    
+        if (!isset($_SESSION["user_id"])) {
+            header("Location: login.php");
+            exit;
+        }
         $sql = "SELECT posts.*, userprofiles.Nickname, userprofiles.ProfilePicture,
         COALESCE(SUM(postscore.Value), 0) as Score,
         COALESCE(SUM(Value = 1), 0) as Likes,
@@ -152,7 +155,7 @@ if(isset($_SESSION["user_id"])){
                         <a href="login.php" class="btn btn-icon comment-btn">Comment</a>
                     </div>
                     <div>
-                        <a href="login.php"  class="btn btn-icon starmark-btn">Star</a>
+                        <a href="login.php" class="btn btn-icon starmark-btn">Star</a>
                         <button class="btn btn-icon share-btn">Share</button>
                     </div>
                     <?php endif;?>
