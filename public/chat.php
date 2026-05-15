@@ -2,6 +2,10 @@
 $pageTitle = "Home"; // <-- set dynamic page title
 require_once __DIR__ . '/../includes/header.php';
 
+if(!isset($_SESSION["user_id"])){
+     header("Location: ../public/login.php");
+}
+
 $conversationId = $_GET['conversation'] ?? null;
 $messages = [];
 

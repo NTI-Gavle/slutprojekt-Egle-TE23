@@ -34,6 +34,7 @@ switch ($feed) {
         break;
 
     case 'following':
+        header("Location: ../public/login.php");
         $sql = "SELECT posts.*, userprofiles.Nickname, userprofiles.ProfilePicture,
         COALESCE(SUM(postscore.Value), 0) as Score,
         COALESCE(SUM(Value = 1), 0) as Likes,
@@ -124,17 +125,19 @@ if(isset($_SESSION["user_id"])){
             <?php foreach($posts as $post): ?>
             <div class="post-container" data-post-id="<?= $post['id']?>">
                 <a href="profile.php?id=<?= htmlspecialchars($post["UserId"]) ?>" class="post-header no-underline">
-                    <img src=<?php echo("../uploads/pfp/".htmlspecialchars($post["ProfilePicture"]))?> class="post-profile-pic">
+                    <img src=<?php echo("../uploads/pfp/".htmlspecialchars($post["ProfilePicture"]))?>
+                        class="post-profile-pic">
                     <span class="post-username"><?= htmlspecialchars($post["Nickname"]) ?></span>
                 </a>
 
                 <div class="post-content">
-                    <p><?= htmlspecialchars($post["Text"]) ?></p>
+                    <p><?= htmlspecialchars($post["Text"])?></p>
                 </div>
 
                 <div class="post-button-container">
+                    <?php if(isset($_SESSION['user_id'])):?>
                     <div>
-                        <button class="btn btn-icon like-btn">Like (<?= $post['Likes'] ?? 0 ?>)</button>
+                        <button class="btn btn-icon like-btn">Like(<?= $post['Likes'] ?? 0 ?>)</button>
                         <button class="btn btn-icon dislike-btn">Dislike (<?= $post['Dislikes'] ?? 0 ?>)</button>
                         <button class="btn btn-icon comment-btn">Comment</button>
                     </div>
@@ -142,6 +145,17 @@ if(isset($_SESSION["user_id"])){
                         <button class="btn btn-icon starmark-btn">Star</button>
                         <button class="btn btn-icon share-btn">Share</button>
                     </div>
+                    <?php else: ?>
+                    <div>
+                        <a href="login.php" class="btn btn-icon like-btn">Like(<?= $post['Likes'] ?? 0 ?>)</a>
+                        <a href="login.php" class="btn btn-icon dislike-btn">Dislike (<?= $post['Dislikes'] ?? 0 ?>)</a>
+                        <a href="login.php" class="btn btn-icon comment-btn">Comment</a>
+                    </div>
+                    <div>
+                        <a href="login.php"  class="btn btn-icon starmark-btn">Star</a>
+                        <button class="btn btn-icon share-btn">Share</button>
+                    </div>
+                    <?php endif;?>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -151,5 +165,4 @@ if(isset($_SESSION["user_id"])){
     <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 </div>
 
-<?php
-require_once __DIR__ . '/../includes/footer.php';
+<?php require_once __DIR__ . '/../includes/footer.php';
