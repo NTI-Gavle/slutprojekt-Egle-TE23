@@ -5,11 +5,11 @@ $hostname = 'localhost';
 $DB_USER = 'root';
 $DB_PASSWORD = 'root';
 
-$options = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'UTF8'");
+$options = array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4");
 
 try {
   $dbconn = new PDO(
-    "mysql:host=$hostname;dbname=$dbname;",
+     "mysql:host=localhost;dbname=kvitter_db;charset=utf8mb4",
     $DB_USER,
     $DB_PASSWORD,
     $options

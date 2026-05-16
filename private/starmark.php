@@ -1,17 +1,31 @@
 <?php
 session_start();
 require_once 'dbconnection.php';
+header('Content-Type: application/json');
+
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['ok' => false, 'error' => 'Not logged in']);
+    exit;
+}
 
 $userId = $_SESSION['user_id'];
-$postId = $_POST['post_id'];
+$postId = (int)$_POST['post_id'];
 
-$stmt = $dbconn->prepare("SELECT * FROM starmarks WHERE UserId=? AND PostId=?");
+if (!$postId) {
+    echo json_encode(['ok' => false, 'error' => 'Invalid post']);
+    exit;
+}
+
+$stmt = $dbconn->prepare("SELECT id FROM starmarks WHERE UserId = ? AND PostId = ?");
 $stmt->execute([$userId, $postId]);
+$existing = $stmt->fetch();
 
-if ($stmt->fetch()) {
-    $stmt = $dbconn->prepare("DELETE FROM starmarks WHERE UserId=? AND PostId=?");
-    $stmt->execute([$userId, $postId]);
+if ($existing) {
+    $dbconn->prepare("DELETE FROM starmarks WHERE UserId = ? AND PostId = ?")
+           ->execute([$userId, $postId]);
+    echo json_encode(['ok' => true, 'starred' => false]);
 } else {
-    $stmt = $dbconn->prepare("INSERT INTO starmarks (UserId, PostId) VALUES (?, ?)");
-    $stmt->execute([$userId, $postId]);
+    $dbconn->prepare("INSERT INTO starmarks (UserId, PostId) VALUES (?, ?)")
+           ->execute([$userId, $postId]);
+    echo json_encode(['ok' => true, 'starred' => true]);
 }

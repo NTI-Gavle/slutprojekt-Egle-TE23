@@ -23,12 +23,16 @@ if (likeBtn || dislikeBtn) {
 
     //star
 if (starBtn) {
-    await fetch("../private/starmark.php", {
+    const res = await fetch("../private/starmark.php", {
         method: "POST",
         body: new URLSearchParams({ post_id: postId })
     });
-    starBtn.classList.toggle("active");
-    starBtn.innerHTML = starBtn.classList.contains("active") ? "<i class='fa-solid fa-star'></i> Starred" : "<i class='fa-regular fa-star'></i> Star";
+    const data = await res.json();
+    const isStarred = data.starred;
+    starBtn.classList.toggle("active", isStarred);
+    starBtn.innerHTML = isStarred
+        ? "<i class='fa-solid fa-star'></i>"
+        : "<i class='fa-regular fa-star'></i>";
 }
 
     //comment

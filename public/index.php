@@ -13,8 +13,8 @@ switch ($feed) {
         COALESCE(SUM(Value = -1), 0) as Dislikes
         FROM posts
         JOIN userprofiles ON posts.UserId = userprofiles.UserId
-        LEFT JOIN postscore ON posts.Id = postscore.PostId
-        GROUP BY posts.Id, userprofiles.Nickname, userprofiles.ProfilePicture
+        LEFT JOIN postscore ON posts.id = postscore.PostId
+        GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
         ORDER BY posts.CreatedAt DESC
         LIMIT 50";
         break;
@@ -25,8 +25,8 @@ switch ($feed) {
         COALESCE(SUM(Value = -1), 0) as Dislikes
         FROM posts
         JOIN userprofiles ON posts.UserId = userprofiles.UserId
-        LEFT JOIN postscore ON posts.Id = postscore.PostId
-        GROUP BY posts.Id, userprofiles.Nickname, userprofiles.ProfilePicture
+        LEFT JOIN postscore ON posts.id = postscore.PostId
+        GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
         ORDER BY (Score / (TIMESTAMPDIFF(HOUR, posts.CreatedAt, NOW()) + 2)) DESC
         LIMIT 50";
         break;
@@ -37,9 +37,9 @@ switch ($feed) {
         COALESCE(SUM(Value = -1), 0) as Dislikes
         FROM posts
         JOIN userprofiles ON posts.UserId = userprofiles.UserId
-        LEFT JOIN postscore ON posts.Id = postscore.PostId
+        LEFT JOIN postscore ON posts.id = postscore.PostId
         WHERE posts.UserId IN (SELECT FollowedUserId FROM followingrelationships WHERE UserId = ?)
-        GROUP BY posts.Id, userprofiles.Nickname, userprofiles.ProfilePicture
+        GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
         ORDER BY posts.CreatedAt DESC
         LIMIT 50";
         $stmt = $dbconn->prepare($sql);
@@ -52,8 +52,8 @@ switch ($feed) {
         COALESCE(SUM(Value = -1), 0) as Dislikes
         FROM posts
         JOIN userprofiles ON posts.UserId = userprofiles.UserId
-        LEFT JOIN postscore ON posts.Id = postscore.PostId
-        GROUP BY posts.Id, userprofiles.Nickname, userprofiles.ProfilePicture
+        LEFT JOIN postscore ON posts.id = postscore.PostId
+        GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
         ORDER BY RAND()
         LIMIT 50";
         break;
@@ -70,10 +70,10 @@ if (isset($_SESSION["user_id"])) {
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
     //get follows for send func
-    $stmt = $dbconn->prepare("SELECT u.Id, u.Username, up.Nickname, up.ProfilePicture
+    $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
         FROM followingrelationships fr
-        JOIN users u ON fr.FollowedUserId = u.Id
-        JOIN userprofiles up ON u.Id = up.UserId
+        JOIN users u ON fr.FollowedUserId = u.id
+        JOIN userprofiles up ON u.id = up.UserId
         WHERE fr.UserId = ?
         LIMIT 30");
     $stmt->execute([$_SESSION["user_id"]]);
@@ -152,7 +152,7 @@ if (!empty($postIds)) {
                     <img src="../uploads/pfp/<?= htmlspecialchars($f['ProfilePicture']) ?>" class="post-profile-pic">
                     <span><?= htmlspecialchars($f['Nickname']) ?></span>
                     <button class="btn btn-secondary btn-sm send-to-user-btn"
-                        data-user-id="<?= $f['Id'] ?>">&ltsend&gt</button>
+                        data-user-id="<?= $f['id'] ?>">&ltsend&gt</button>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -174,7 +174,7 @@ if (!empty($postIds)) {
 
         <div class="post-feed">
             <?php foreach ($posts as $post):
-                $pid = $post['Id'] ?? $post['id'];
+                $pid = $post['id'];
                 $topC = $topComments[$pid] ?? null;
                 $cCount = $commentCounts[$pid] ?? 0;
             ?>
@@ -188,7 +188,7 @@ if (!empty($postIds)) {
                 <div class="post-content">
                     <p><?= htmlspecialchars($post["Text"]) ?></p>
                 </div>
-                
+
                 <!--comment -->
                 <?php if ($topC): ?>
                 <div class="post-top-comment">
@@ -213,8 +213,8 @@ if (!empty($postIds)) {
                         <button class="btn btn-icon comment-btn"><i class="fa-solid fa-comment"></i> Comment</button>
                     </div>
                     <div>
-                        <button class="btn btn-icon starmark-btn"><i class="fa-solid fa-star"></i> Star</button>
-                        <button class="btn btn-icon share-btn"><i class="fa-solid fa-paper-plane"></i> Send</button>
+                        <button class="btn btn-icon starmark-btn"><i class="fa-solid fa-star"></i></button>
+                        <button class="btn btn-icon share-btn"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
                     <?php else: ?>
                     <div>
@@ -223,8 +223,8 @@ if (!empty($postIds)) {
                         <a href="login.php" class="btn btn-icon">Comment</a>
                     </div>
                     <div>
-                        <a href="login.php" class="btn btn-icon">Star</a>
-                        <button class="btn btn-icon share-btn">Send</button>
+                         <a href="login.php" class="btn btn-icon"><i class="fa-solid fa-star"></i></a>
+                        <button class="btn btn-icon share-btn"><i class="fa-solid fa-paper-plane"></i> Send</button>
                     </div>
                     <?php endif; ?>
                 </div>
