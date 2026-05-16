@@ -10,8 +10,8 @@
         <?php else:?>
         <a href="login.php"  class="btn btn-icon"><i class="fa-solid fa-plus"></i></a>
         <?php endif;?>
-        <a class="btn btn-icon" href="stars.php"><i class="fa-solid fa-gear"></i></a>
-        <a class="btn btn-icon" href="settings.php"><i class="fa-solid fa-star"></i></a>
+        <a class="btn btn-icon" href="stars.php"><i class="fa-solid fa-star"></i></a>
+        <a class="btn btn-icon" href="settings.php"><i class="fa-solid fa-gear"></i></a>
         <a class="btn btn-icon" href="contact.php"><i class="fa-solid fa-envelope"></i></a>
     </div>
     </ul>

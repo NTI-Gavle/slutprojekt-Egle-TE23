@@ -1,119 +1,171 @@
 <?php
 $pageTitle = "Settings";
 require_once __DIR__ . '/../includes/header.php';
+require_once('../private/dbconnection.php');
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: ../public/login.php");
+    header("Location: login.php");
     exit;
 }
 
 $userId = $_SESSION["user_id"];
 
-// CSRF
 if (empty($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
 }
 
-// Fetch user
+$tab = $_GET['tab'] ?? 'account';
+$allowed = ['account','general','about'];
+if (!in_array($tab, $allowed)) {
+    $tab = 'account';
+}
+
+
 $stmt = $dbconn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$userId]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Fetch profile
 $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
 $stmt->execute([$userId]);
 $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+//errs
+$settingsErrors = $_SESSION['settings_errors'] ?? [];
+unset($_SESSION['settings_errors']);
+ 
+//defult cookies
+$animatedBgOn = !isset($_COOKIE['animated-bg']) || $_COOKIE['animated-bg'] === 'true';
+$darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
 ?>
 
 <script defer src="js/settings.js"></script>
 
 <div class="settings-container">
-
     <nav class="settings-nav settings-field">
-        <h1>Settings</h1>
+        <h2 style="margin-bottom:16px">Settings</h2>
         <ul class="settings-list">
-            <li><button onclick="ShowSettings('account')" class="btn btn-secondary btn-pill">&ltaccount&gt</button></li>
-            <li><button onclick="ShowSettings('general')" class="btn btn-secondary btn-pill">&ltgeneral&gt</button></li>
-            <li><button onclick="ShowSettings('about')" class="btn btn-secondary btn-pill">&ltabout&gt</button></li>
-            <li><a href="logout.php" class="btn btn-secondary btn-pill">&ltlogout&gt</a></li>
+            <li><button onclick="location.href='settings.php?tab=account'" class="btn btn-secondary btn-pill">&ltaccount&gt</button></li>
+            <li><button onclick="location.href='settings.php?tab=general'" class="btn btn-secondary btn-pill">&ltgeneral&gt</button></li>
+            <li><button onclick="location.href='settings.php?tab=about'" class="btn btn-secondary btn-pill">&ltabout&gt</button></li>
+            <li style="margin-top:20px">
+                <a href="logout.php" class="btn btn-primary btn-pill" onclick="return confirm('Are you sure you want to log out?')">&ltlogout&gt</a>
+            </li>
         </ul>
     </nav>
 
     <div class="settings-display settings-field">
-        <div id="account" class="settings-section" style="display:none;">
-            <h1>Account</h1>
+        <!--account -->
+        <div id="account" class="settings-section" style="<?= $tab === 'account' ? 'display:flex' : 'display:none' ?>">
+            <h2>Account</h2>
 
-            <?php if(isset($_GET['success'])): ?>
-            <div class="alert alert-success">Saved!</div>
+            <?php if (isset($_GET['success'])): ?>
+            <div class="alert alert-success">✓ Changes saved!</div>
             <?php endif; ?>
-            <?php if(isset($_GET['error'])): ?>
-            <div class="alert alert-danger">Something went wrong</div>
+            <?php if (isset($_GET['error'])): ?>
+            <div class="alert alert-danger">Something went wrong — please try again.</div>
             <?php endif; ?>
 
-            <form method="POST" action="../private/settings_update.php" enctype="multipart/form-data">
+            <form method="POST" action="../private/settings_update.php" enctype="multipart/form-data" class="settings-form">
                 <input type="hidden" name="csrf" value="<?= $_SESSION['csrf'] ?>">
-                <label>Profile picture
-                    <input type="file" name="profile_picture" class="form-control">
-                </label>
-                <label>Profile banner
-                    <input type="file" name="profile_banner" class="form-control">
-                </label>
-                <label>Username
-                    <input type="text" name="username" class="form-control"
-                        value="<?= htmlspecialchars($user['Username'] ?? '') ?>">
-                </label>
-                <label>Nickname
-                    <input type="text" name="nickname" class="form-control"
+
+                <!--pfp-->
+                <div class="settings-image-row">
+                    <div class="settings-image-group">
+                        <label class="settings-label">Profile picture</label>
+                        <div class="settings-image-preview-wrap">
+                            <img id="pfp-preview" src="../uploads/pfp/<?= htmlspecialchars($profile['ProfilePicture'] ?? '') ?>" alt="pfp" class="settings-pfp-preview">
+                            <label class="settings-image-overlay" title="Change photo" style="border-radius:100px;">
+                                <i class="fa-solid fa-camera"></i>
+                                <input type="file" name="profile_picture" accept="image/*" style="display:none;" onchange="previewImage(this,'pfp-preview')">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-image-group" style="flex:1">
+                        <label class="settings-label">Banner</label>
+                        <div class="settings-banner-preview-wrap">
+                            <img id="banner-preview" src="../uploads/banner/<?= htmlspecialchars($profile['Banner'] ?? '') ?>" alt="banner" class="settings-banner-preview">
+                            <label class="settings-image-overlay" title="Change banner" style="border-radius:10px;">
+                                <i class="fa-solid fa-camera"></i>
+                                <input type="file" name="profile_banner" accept="image/*" style="display:none" onchange="previewImage(this,'banner-preview')">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <!--general info-->
+                <div class="settings-section-title">Profile Info</div>
+                <label class="settings-label">Nickname
+                    <input type="text" name="nickname" class="form-control" maxlength="30"
                         value="<?= htmlspecialchars($profile['Nickname'] ?? '') ?>">
                 </label>
-                <label>Description
-                    <textarea name="description"
-                        class="form-control"><?= htmlspecialchars($profile['Description'] ?? '') ?></textarea>
+                <label class="settings-label">Bio
+                    <textarea name="description" class="form-control" maxlength="200" rows="3"
+                        style="resize:vertical"><?= htmlspecialchars($profile['Description'] ?? '') ?></textarea>
                 </label>
-                <label>Email
-                    <input type="email" name="email" class="form-control"
-                        value="<?= htmlspecialchars($user['Email'] ?? '') ?>">
-                </label>
-                <label>Password
-                    <input type="password" name="password" class="form-control" placeholder="leave empty to keep">
-                </label>
-                <label>Birthday
+                <label class="settings-label">Birthday
                     <input type="date" name="birthdate" class="form-control"
                         value="<?= htmlspecialchars($profile['BirthDate'] ?? '') ?>">
                 </label>
-                <button type="submit" class="btn btn-primary mt-2">Save changes</button>
+
+                <!--username and email-->
+                <div class="settings-section-title" style="margin-top:16px">Account</div>
+                <label class="settings-label">Username
+                    <input type="text" name="username" class="form-control" maxlength="20"
+                        value="<?= htmlspecialchars($user['Username'] ?? '') ?>">
+                </label>
+                <label class="settings-label">Email
+                    <input type="email" name="email" class="form-control"
+                        value="<?= htmlspecialchars($user['Email'] ?? '') ?>">
+                </label>
+
+                <!--change password-->
+                <div class="settings-section-title" style="margin-top:16px">Change Password</div>
+                <p style="font-size:0.85em;opacity:0.65">Leave blank to keep your current password.</p>
+                <label class="settings-label">New password
+                    <input type="password" name="password" id="new-pass" class="form-control" placeholder="New password" maxlength="50">
+                </label>
+                <label class="settings-label">Confirm new password
+                    <input type="password" name="password_confirm" id="confirm-pass" class="form-control" placeholder="Confirm new password" maxlength="50">
+                </label>
+                <p id="pass-mismatch" style="color:red;display:none;font-size:0.85em">Passwords do not match.</p>
+
+                <button type="submit" class="btn btn-secondary" style="margin-top:16px" onclick="return validatePasswords()">
+                    Save changes
+                </button>
             </form>
         </div>
 
-        <div id="general" class="settings-section">
-            <h1>General</h1>
-            <label class="form-label">Darkmode
+        <!--general-->
+        <div id="general" class="settings-section" style="<?= $tab === 'general' ? 'display:flex' : 'display:none' ?>">
+            <h2>General</h2>
+            <div class="settings-toggle-row">
+                <div>
+                    <strong>Dark mode</strong>
+                    <p style="opacity:0.6;font-size:0.85em;margin:0">Switch between the light sky and dark night theme.</p>
+                </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="darkmode-toggle"
                         <?= (!empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'true') ? 'checked' : '' ?>>
                 </div>
-            </label>
-            <label class="form-label">Clouds
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="cloud-toggle"
-                        <?= (!empty($_COOKIE['clouds']) && $_COOKIE['clouds'] === 'true') ? 'checked' : '' ?>>
+            </div>
+            <div class="settings-toggle-row">
+                <div>
+                    <strong>Animated star background</strong>
+                    <p style="opacity:0.6;font-size:0.85em;margin:0">Show the starfield and shooting star animation.</p>
                 </div>
-            </label>
-            <label class="form-label">Animated background
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="animated-bg-toggle"
                         <?= (!empty($_COOKIE['animated-bg']) && $_COOKIE['animated-bg'] === 'true') ? 'checked' : '' ?>>
                 </div>
-            </label>
+            </div>
         </div>
-
-
-        <div id="about" class="settings-section" style="display:none;">
-            <h1>About</h1>
-            <p>My name is God, I made this.</p>
+        <!--about-->
+      <div id="about" class="settings-section" style="<?= $tab === 'about' ? 'display:flex' : 'display:none' ?>">
+            <h2>About LO-GO</h2>
+            <p>I made this awesome super cool website! 
+            <br>If you want to contact me there's a button bellow, press it!</p>
+            <p style="opacity:0.6; font-size:0.85em">Version 1.75.1 &bull; Made by Me</p>
+            <a href="contact.php" class="btn btn-secondary btn-sm" style="margin-top:10px">&ltcontact&gt</a>
         </div>
 
     </div>
 </div>
-
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

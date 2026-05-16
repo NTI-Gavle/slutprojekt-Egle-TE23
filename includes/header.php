@@ -63,4 +63,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         </div>
     </header>
     <canvas id="starfield"></canvas>
+    <div class="background"></div>
     <main class="main-content">
+     
