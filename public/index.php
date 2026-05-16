@@ -79,33 +79,53 @@ if (isset($_SESSION["user_id"])) {
     $stmt->execute([$_SESSION["user_id"]]);
     $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+//post comments
+$postIds = array_column($posts, 'id') ?: array_column($posts, 'id');
+$topComments = [];
+$commentCounts = [];
+if (!empty($postIds)) {
+    $placeholders = implode(',', array_fill(0, count($postIds), '?'));
+    $stmt = $dbconn->prepare("SELECT c.*, up.Nickname, up.ProfilePicture,
+        ROW_NUMBER() OVER (PARTITION BY c.PostId ORDER BY c.CreatedAt ASC) as rn
+        FROM comments c JOIN userprofiles up ON c.UserId = up.UserId
+        WHERE c.PostId IN ($placeholders)");
+    $stmt->execute($postIds);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $commentCounts[$row['PostId']] = ($commentCounts[$row['PostId']] ?? 0) + 1;
+        if ($row['rn'] == 1) $topComments[$row['PostId']] = $row;
+    }
+    $stmt = $dbconn->prepare("SELECT PostId, COUNT(*) as cnt FROM comments WHERE PostId IN ($placeholders) GROUP BY PostId");
+    $stmt->execute($postIds);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) $commentCounts[$row['PostId']] = $row['cnt'];
+}
 ?>
 <script src="js/feed.js" defer></script>
 
 <?php if (isset($_SESSION["user_id"])): ?>
-    
+
 <!--create post popout-->
 <?php require_once __DIR__ . '/../includes/createpost.php'; ?>
 
 <!--comment popout-->
-<div id="comment-popout" style="display:none" class="modal-overlay">
-    <div class="p-container  modal-box">
+<div id="comment-popout" style="display:none" class="modal-overlay"
+    onclick="if(event.target===this)this.style.display='none'">
+    <div class="p-container modal-box">
         <div class="p-header">
-            <button onclick="document.getElementById('comment-popout').style.display='none'" class="btn btn-icon">✕</button>
-            <span class="post-username">Add a comment</span>
+            <button onclick="document.getElementById('comment-popout').style.display='none'"
+                class="btn btn-icon">✕</button>
+            <span class="post-username">Comments</span>
         </div>
         <div class="p-content">
             <div id="comment-post-preview" class="comment-preview"></div>
-            <div id="comments-list" class="comments-list"></div>
+            <div id="comments-list" class="comments-list" style="margin:10px 0"></div>
             <form id="comment-form" action="../private/create-comment.php" method="post">
                 <input type="hidden" name="post_id" id="comment-post-id">
                 <div class="form-group">
-                    <textarea maxlength="300" name="comment-text" id="comment-text"
-                        class="form-control" placeholder="Write a comment..."></textarea>
+                    <textarea maxlength="300" name="comment-text" class="form-control" placeholder="Write a comment..."
+                        rows="2" style="resize:none"></textarea>
                 </div>
-                <div class="post-button-container">
-                    <div></div>
-                    <input type="submit" class="btn btn-secondary" value="Comment">
+                <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                    <input type="submit" class="btn btn-secondary btn-sm" value="Post comment">
                 </div>
             </form>
         </div>
@@ -115,7 +135,8 @@ if (isset($_SESSION["user_id"])) {
 <div id="send-popout" style="display:none" class="modal-overlay">
     <div class="p-container modal-box">
         <div class="p-header">
-            <button onclick="document.getElementById('send-popout').style.display='none'" class="btn btn-icon">✕</button>
+            <button onclick="document.getElementById('send-popout').style.display='none'"
+                class="btn btn-icon">✕</button>
             <span class="post-username">Send post</span>
         </div>
         <div class="p-content">
@@ -152,7 +173,11 @@ if (isset($_SESSION["user_id"])) {
         <?php endif; ?>
 
         <div class="post-feed">
-            <?php foreach ($posts as $post): ?>
+            <?php foreach ($posts as $post):
+                $pid = $post['Id'] ?? $post['id'];
+                $topC = $topComments[$pid] ?? null;
+                $cCount = $commentCounts[$pid] ?? 0;
+            ?>
             <div class="post-container" data-post-id="<?= $post['id'] ?>">
                 <a href="profile.php?id=<?= htmlspecialchars($post["UserId"]) ?>" class="post-header no-underline">
                     <img src="../uploads/pfp/<?= htmlspecialchars($post["ProfilePicture"]) ?>" class="post-profile-pic">
@@ -163,17 +188,33 @@ if (isset($_SESSION["user_id"])) {
                 <div class="post-content">
                     <p><?= htmlspecialchars($post["Text"]) ?></p>
                 </div>
+                
+                <!--comment -->
+                <?php if ($topC): ?>
+                <div class="post-top-comment">
+                    <img src="../uploads/pfp/<?= htmlspecialchars($topC['ProfilePicture']) ?>" alt="">
+                    <p><strong><?= htmlspecialchars($topC['Nickname']) ?></strong>
+                        <?= htmlspecialchars(mb_strimwidth($topC['Text'], 0, 80, '...')) ?></p>
+                </div>
+                <?php endif; ?>
+                <?php if ($cCount > 0): ?>
+                <div class="post-comment-count comment-btn" style="cursor:pointer">
+                    <?= $cCount === 1 ? '1 comment' : "$cCount comments" ?> — view all
+                </div>
+                <?php endif; ?>
 
                 <div class="post-button-container">
                     <?php if (isset($_SESSION['user_id'])): ?>
                     <div>
-                        <button class="btn btn-icon like-btn">Like (<?= $post['Likes'] ?? 0 ?>)</button>
-                        <button class="btn btn-icon dislike-btn">Dislike (<?= $post['Dislikes'] ?? 0 ?>)</button>
-                        <button class="btn btn-icon comment-btn">Comment</button>
+                        <button class="btn btn-icon like-btn"><i class="fa-solid fa-thumbs-up"></i>
+                            <?= $post['Likes'] ?></button>
+                        <button class="btn btn-icon dislike-btn"><i class="fa-solid fa-thumbs-down"></i>
+                            <?= $post['Dislikes'] ?></button>
+                        <button class="btn btn-icon comment-btn"><i class="fa-solid fa-comment"></i> Comment</button>
                     </div>
                     <div>
-                        <button class="btn btn-icon starmark-btn">Star</button>
-                        <button class="btn btn-icon share-btn">Send</button>
+                        <button class="btn btn-icon starmark-btn"><i class="fa-solid fa-star"></i> Star</button>
+                        <button class="btn btn-icon share-btn"><i class="fa-solid fa-paper-plane"></i> Send</button>
                     </div>
                     <?php else: ?>
                     <div>

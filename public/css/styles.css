@@ -272,12 +272,12 @@ h1,h2,h3,h4,p
     max-height: 80px;
     overflow: hidden;
 }
-.comments-list {
-    max-height: 260px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.comments-list { 
+    max-height: 260px; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
 }
 .comment-item {
     display: flex;
@@ -288,10 +288,12 @@ h1,h2,h3,h4,p
     padding: 8px 12px;
     color: var(--secondary-text-color);
 }
-.comment-item p {
-    margin: 2px 0 0;
-    font-size: 0.9em;
+.comment-item p 
+{ 
+    margin: 2px 0 0; 
+    font-size: 0.9em; 
 }
+ 
  
 /* Send popout */
 .send-options {
@@ -370,6 +372,29 @@ h1,h2,h3,h4,p
     gap: 10px;
     padding: 10px 20px;
 }
+/*POSt comments*/
+.post-top-comment {
+    padding: 0 20px 10px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    opacity: 0.8;
+    font-size: 0.9em;
+    color: var(--post-text-color);
+}
+.post-top-comment img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.post-top-comment p { margin: 0; }
+.post-comment-count {
+    padding: 0 20px 8px;
+    font-size: 0.8em;
+    opacity: 0.5;
+    color: var(--post-text-color);
+    cursor: pointer;
+}
+.post-comment-count:hover { opacity: 0.8; }
+ 
+
+
 /*Chat*/
 .chat-page-container {
     display: grid;
