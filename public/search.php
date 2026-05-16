@@ -2,48 +2,56 @@
 $pageTitle = "Search";
 require_once __DIR__ . '/../includes/header.php';
 include('../private/dbconnection.php');
+require_once('../includes/functions.php');
+
+//delete
+if (isset($_GET['delete_search']) && isset($_SESSION['user_id'])) {
+    $delId = (int)$_GET['delete_search'];
+    $dbconn->prepare("DELETE FROM searchterms WHERE id = ? AND UserId = ?")->execute([$delId, $_SESSION['user_id']]);
+    header("Location: search.php"); exit;
+}
 
 $query = trim($_POST['search'] ?? $_GET['q'] ?? '');
 $results = [];
 $userResults = [];
+$loggedIn = isset($_SESSION['user_id']);
 
 if ($query !== '') {
     //user search terms
-    if (isset($_SESSION['user_id'])) {
-        $stmt = $dbconn->prepare("DELETE FROM searchterms WHERE UserId = ? AND SearchTerm = ? AND Type = 'user'");
-        $stmt->execute([$_SESSION['user_id'], $query]);
-        $stmt = $dbconn->prepare("INSERT INTO searchterms (UserId, SearchTerm, Type) VALUES (?, ?, 'user')");
-        $stmt->execute([$_SESSION['user_id'], $query]);
+    if ($loggedIn) {
+        $dbconn->prepare("DELETE FROM searchterms WHERE UserId = ? AND SearchTerm = ? AND Type = 'user'")->execute([$_SESSION['user_id'], $query]);
+        $dbconn->prepare("INSERT INTO searchterms (UserId, SearchTerm, Type) VALUES (?, ?, 'user')")->execute([$_SESSION['user_id'], $query]);
     }
     //post searchs
-    $stmt = $dbconn->prepare("SELECT posts.*, userprofiles.Nickname, userprofiles.ProfilePicture,
-        COALESCE(SUM(postscore.Value), 0) as Score,
-        COALESCE(SUM(Value = 1), 0) as Likes,
-        COALESCE(SUM(Value = -1), 0) as Dislikes
-        FROM posts JOIN userprofiles ON posts.UserId = userprofiles.UserId
-        LEFT JOIN postscore ON posts.id = postscore.PostId WHERE posts.Text LIKE ?
-        GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
+    $stmt = $dbconn->prepare("SELECT posts.*, users.Username,
+        userprofiles.Nickname, userprofiles.ProfilePicture,
+        COALESCE(SUM(postscore.Value=1),0) as Likes,
+        COALESCE(SUM(postscore.Value=-1),0) as Dislikes
+        FROM posts
+        JOIN users ON posts.UserId = users.id
+        JOIN userprofiles ON posts.UserId = userprofiles.UserId
+        LEFT JOIN postscore ON posts.id = postscore.PostId
+        WHERE posts.Text LIKE ?
+        GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture 
         ORDER BY posts.CreatedAt DESC LIMIT 30");
     $stmt->execute(['%'.$query.'%']);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     //user search
     $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture, up.Description
         FROM users u JOIN userprofiles up ON u.id = up.UserId
-        WHERE u.Username LIKE ? OR up.Nickname LIKE ? LIMIT 10");
-    $stmt->execute(['%'.$query.'%','%'.$query.'%']);
+        WHERE u.Username LIKE ? OR up.Nickname LIKE ? LIMIT 6");
+    $stmt->execute(['%'.$query.'%', '%'.$query.'%']);
     $userResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-//recent
+
 $recentSearches = [];
-if (isset($_SESSION['user_id'])) {
+if ($loggedIn) {
     $stmt = $dbconn->prepare("SELECT id, SearchTerm FROM searchterms WHERE UserId = ? AND Type = 'user' ORDER BY id DESC LIMIT 5");
     $stmt->execute([$_SESSION['user_id']]);
     $recentSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-//other users searches
-$stmt = $dbconn->prepare("SELECT SearchTerm, COUNT(*) as cnt
-    FROM searchterms WHERE Type = 'user' GROUP BY SearchTerm
-    ORDER BY cnt DESC LIMIT 8");
+$stmt = $dbconn->prepare("SELECT SearchTerm, COUNT(*) as cnt FROM searchterms WHERE Type = 'user' GROUP BY SearchTerm ORDER BY cnt DESC LIMIT 8");
 $stmt->execute();
 $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -54,112 +62,132 @@ $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="feed">
         <h1>&ltsearch&gt</h1>
 
-        <form action="search.php" method="GET" class="search-form">
-            <div id="search-wrapper" style="width:100%;margin-bottom:15px; max-width: 5000px;">
-                <div id="search-bar">
+        <!-- Search bar -->
+        <form action="search.php" method="GET">
+            <div style="width:100%;margin-bottom:20px">
+                <div id="search-bar" style="max-width:100%">
                     <i class="fa-solid fa-magnifying-glass" style="opacity:0.7"></i>
-                    <input type="text" name="q" id="search-field" value="<?= htmlspecialchars($query) ?>"
-                        placeholder="search..." autocomplete="off">
+                    <input type="text" name="q" id="search-field-page" value="<?= htmlspecialchars($query) ?>"
+                        placeholder="search…" autocomplete="off" style="flex:1">
+                    <?php if ($query !== ''): ?>
+                    <a href="search.php" style="color:var(--secondary-text-color);opacity:0.7;text-decoration:none">✕</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </form>
 
-        <div id="search-dropdown" style="position:static; display:block;">
-            <div id="search-dropdown-inner">
-                <?php if ($query === ''): ?>
-                <!--recent-->
+        <?php if ($query === ''): ?>
+        <div class="p-container" style="overflow:hidden">
+            <div id="search-dropdown-inner" style="display:block">
                 <?php if (!empty($recentSearches)): ?>
                 <div class="search-dd-section">Recent</div>
-
                 <?php foreach ($recentSearches as $rs): ?>
-                <div class="search-dd-row">
+                <div class="search-dd-row" style="position:relative">
                     <i class="fa-solid fa-clock-rotate-left search-dd-icon"></i>
-
-                    <a class="no-underline" href="search.php?q=<?= urlencode($rs['SearchTerm']) ?>">
+                    <a class="no-underline" href="search.php?q=<?= urlencode($rs['SearchTerm']) ?>" style="flex:1;color:var(--post-text-color)">
                         <?= htmlspecialchars($rs['SearchTerm']) ?>
                     </a>
-
-                    <button class="search-dd-del" onclick="location.href='search.php?delete_search=<?= $rs['id'] ?>'">
-                        ✕
-                    </button>
+                    <a href="search.php?delete_search=<?= $rs['id'] ?>" class="search-dd-del" title="remove">✕</a>
                 </div>
                 <?php endforeach; ?>
                 <?php endif; ?>
-                <!--popular -->
+
                 <?php if (!empty($popularSearches)): ?>
                 <div class="search-dd-section">Trending</div>
-                
                 <?php foreach ($popularSearches as $ps): ?>
                 <div class="search-dd-row">
                     <i class="fa-solid fa-sun search-dd-icon" style="color:var(--accent-color)"></i>
-
-                    <a class="no-underline" href="search.php?q=<?= urlencode($ps['SearchTerm']) ?>">
+                    <a class="no-underline" href="search.php?q=<?= urlencode($ps['SearchTerm']) ?>" style="flex:1;color:var(--post-text-color)">
                         <?= htmlspecialchars($ps['SearchTerm']) ?>
                     </a>
-
-                    <small style="opacity:0.5;margin-left:auto">
-                        <?= $ps['cnt'] ?>
-                    </small>
+                    <small style="opacity:0.5"><?= $ps['cnt'] ?></small>
                 </div>
                 <?php endforeach; ?>
                 <?php endif; ?>
-                <?php else: ?>
-                <!--users-->
-                <?php if (!empty($userResults)): ?>
-                <div class="search-dd-section">People</div>
-                <?php foreach ($userResults as $u): ?>
-                <a href="profile.php?id=<?= $u['id'] ?>" class="search-dd-row no-underline">
-                    <img src="../uploads/pfp/<?= htmlspecialchars($u['ProfilePicture']) ?>" class="search-dd-pfp">
-                    <div>
-                        <strong><?= htmlspecialchars($u['Nickname']) ?></strong>
-                        <small>@<?= htmlspecialchars($u['Username']) ?></small>
-                    </div>
-                </a>
-                <?php endforeach; ?>
-                <?php endif; ?>
-                <!--post-->
-                <?php if (!empty($results)): ?>
-                <div class="search-dd-section">Posts</div>
 
-                <?php foreach ($results as $post): ?>
-                <a href="post.php?id=<?= $post['id'] ?>" class="search-dd-row no-underline">
-                    <i class="fa-solid fa-magnifying-glass search-dd-icon"></i>
-                    <span>
-                        <?= htmlspecialchars(mb_strimwidth($post['Text'], 0, 70, '...')) ?>
-                    </span>
-                </a>
-                
-                <?php endforeach; ?>
-
-                <?php else: ?>
-                <div class="search-dd-empty">
-                    No results found for "<?= htmlspecialchars($query) ?>"
-                </div>
-                <?php endif; ?>
+                <?php if (empty($recentSearches) && empty($popularSearches)): ?>
+                <div class="search-dd-empty">Start typing to search…</div>
                 <?php endif; ?>
             </div>
         </div>
+
+        <?php else: ?>
+
+        <?php if (empty($userResults) && empty($results)): ?>
+        <div class="p-container" style="padding:20px;text-align:center;opacity:0.6">
+            No results found for "<?= htmlspecialchars($query) ?>"
+        </div>
+        <?php endif; ?>
+
+        <?php if (!empty($userResults)): ?>
+        <p class="search-results-section-title">People</p>
+        <?php foreach ($userResults as $u): ?>
+        <a href="profile.php?id=<?= $u['id'] ?>" class="search-user-card">
+            <img src="../uploads/pfp/<?= htmlspecialchars($u['ProfilePicture']) ?>" alt="">
+            <div class="search-user-card-info">
+                <strong><?= htmlspecialchars($u['Nickname']) ?></strong>
+                <small>@<?= htmlspecialchars($u['Username']) ?></small>
+                <?php if (!empty($u['Description'])): ?>
+                <p class="search-user-card-bio"><?= htmlspecialchars(mb_strimwidth($u['Description'], 0, 80, '…')) ?></p>
+                <?php endif; ?>
+            </div>
+        </a>
+        <?php endforeach; ?>
+        <?php endif; ?>
+
+        <?php if (!empty($results)): ?>
+        <p class="search-results-section-title">Posts</p>
+        <div class="post-feed" style="padding:0">
+            <?php foreach ($results as $post):
+                $mstmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
+                $mstmt->execute([$post['id']]);
+                $mf = $mstmt->fetchAll(PDO::FETCH_COLUMN);
+                renderPostCard($post, $mf, null, 0, $loggedIn);
+            endforeach; ?>
+        </div>
+        <?php endif; ?>
+        <?php endif; ?>
     </div>
 
     <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 </div>
 
-<?php
-//delete
-if (isset($_GET['delete_search']) && isset($_SESSION['user_id'])) {
-    $delId = (int)$_GET['delete_search'];
-    $stmt = $dbconn->prepare("DELETE FROM searchterms WHERE id = ? AND UserId = ?");
-    $stmt->execute([$delId, $_SESSION['user_id']]);
-    header("Location: search.php");
-    exit;
-}
-//clear
-if (isset($_GET['clear_recent']) && isset($_SESSION['user_id'])) {
-    $stmt = $dbconn->prepare("DELETE FROM searchterms WHERE UserId = ? AND Type = 'user'");
-    $stmt->execute([$_SESSION['user_id']]);
-    header("Location: search.php");
-    exit;
-}
+<!--comment -->
+<?php if ($loggedIn): ?>
+<div id="comment-popout" style="display:none" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+    <div class="p-container modal-box">
+        <div class="p-header">
+            <button onclick="document.getElementById('comment-popout').style.display='none'" class="btn btn-icon">✕</button>
+            <span class="post-username">Comments</span>
+        </div>
+        <div class="p-content">
+            <div id="comment-post-preview" class="comment-preview"></div>
+            <div id="comments-list" class="comment-thread" style="margin:10px 0;max-height:300px;overflow-y:auto"></div>
+            <form id="comment-form" action="../private/create-comment.php" method="post">
+                <input type="hidden" name="post_id" id="comment-post-id">
+                <textarea maxlength="300" name="comment-text" class="form-control" placeholder="Write a comment…" rows="2" style="resize:none"></textarea>
+                <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                    <input type="submit" class="btn btn-secondary btn-sm" value="Post comment">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="send-popout" style="display:none" class="modal-overlay">
+    <div class="p-container modal-box">
+        <div class="p-header">
+            <button onclick="document.getElementById('send-popout').style.display='none'" class="btn btn-icon">✕</button>
+            <span class="post-username">Send post</span>
+        </div>
+        <div class="p-content">
+            <div class="send-options">
+                <button class="btn btn-secondary" id="copy-link-btn">&ltcopy link&gt</button>
+                <span id="copy-confirm" style="display:none;color:green">Copied!</span>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
-require_once __DIR__ . '/../includes/footer.php';
-?>
+<script src="js/feed.js" defer></script>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

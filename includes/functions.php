@@ -8,8 +8,11 @@ function renderPostCard(array $post, array $mediaFiles = [], ?array $topComment 
     $mediaCount = count($mediaFiles);
 ?>
 <div class="post-card" data-post-id="<?= $pid ?>">
-    <a href="profile.php?id=<?= (int)$post['UserId'] ?>" class="post-header">
-        <img src="../uploads/pfp/<?= htmlspecialchars($post['ProfilePicture'] ?? 'default.png') ?>" class="post-profile-pic" alt="">
+    <a href="post.php?id=<?= (int)$post['id'] ?>" class="post-header">
+
+        <img href="profile.php?id=<?= (int)$post['UserId'] ?>"
+            src="../uploads/pfp/<?= htmlspecialchars($post['ProfilePicture'] ?? 'default.png') ?>"
+            class="post-profile-pic" alt="">
         <div>
             <div class="post-username"><?= htmlspecialchars($post['Nickname'] ?? '') ?></div>
             <div class="post-handle">@<?= htmlspecialchars($post['Username'] ?? '') ?></div>
@@ -18,17 +21,16 @@ function renderPostCard(array $post, array $mediaFiles = [], ?array $topComment 
     </a>
 
     <?php if ($post['Text'] !== ''): ?>
-    <div class="post-body"><p><?= htmlspecialchars($post['Text']) ?></p></div>
+    <div class="post-body">
+        <p><?= htmlspecialchars($post['Text']) ?></p>
+    </div>
     <?php endif; ?>
 
     <?php if ($mediaCount > 0): ?>
     <div class="post-img-grid count-<?= min($mediaCount, 4) ?>">
         <?php foreach (array_slice($mediaFiles, 0, 4) as $i => $file): ?>
-        <img src="../uploads/media/<?= htmlspecialchars($file) ?>"
-             class="lightbox-trigger"
-             data-index="<?= $i ?>"
-             data-images='<?= htmlspecialchars(json_encode($mediaFiles)) ?>'
-             alt="post image">
+        <img src="../uploads/media/<?= htmlspecialchars($file) ?>" class="lightbox-trigger" data-index="<?= $i ?>"
+            data-images='<?= htmlspecialchars(json_encode($mediaFiles)) ?>' alt="post image">
         <?php endforeach; ?>
     </div>
     <?php endif; ?>
@@ -39,7 +41,7 @@ function renderPostCard(array $post, array $mediaFiles = [], ?array $topComment 
     <div class="post-preview-comment comment-btn">
         <img src="../uploads/pfp/<?= htmlspecialchars($topComment['ProfilePicture']) ?>" alt="">
         <p><strong><?= htmlspecialchars($topComment['Nickname']) ?></strong>
-           <?= htmlspecialchars(mb_strimwidth($topComment['Text'], 0, 90, '…')) ?></p>
+            <?= htmlspecialchars(mb_strimwidth($topComment['Text'], 0, 90, '…')) ?></p>
     </div>
     <?php endif; ?>
     <?php if ($commentCount > 1): ?>

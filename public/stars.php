@@ -2,80 +2,121 @@
 $pageTitle = "Bookmarks";
 require_once __DIR__ . '/../includes/header.php';
 require_once('../private/dbconnection.php');
+require_once('../includes/functions.php');
 
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
-    exit;
-}
-
+if (!isset($_SESSION["user_id"])) { header("Location: login.php"); exit; }
 $userId = $_SESSION["user_id"];
 
-$sql = "SELECT 
-    posts.*,
-    userprofiles.Nickname,
-    userprofiles.ProfilePicture,
-    COALESCE(scores.Score, 0) as Score,
-    COALESCE(scores.Likes, 0) as Likes,
-    COALESCE(scores.Dislikes, 0) as Dislikes
-FROM starmarks
-JOIN posts ON starmarks.PostId = posts.Id
-JOIN userprofiles ON posts.UserId = userprofiles.UserId
-LEFT JOIN (
-    SELECT PostId,
-    SUM(Value) as Score,
-    SUM(Value = 1) as Likes,
-    SUM(Value = -1) as Dislikes
-    FROM postscore
-    GROUP BY PostId
-) as scores 
-ON posts.Id = scores.PostId
-WHERE starmarks.UserId = ?
-ORDER BY starmarks.Id DESC";
-
-$stmt = $dbconn->prepare($sql);
+$stmt = $dbconn->prepare("SELECT posts.*, users.Username,
+    userprofiles.Nickname, userprofiles.ProfilePicture,
+    COALESCE(SUM(ps.Value=1),0) as Likes,
+    COALESCE(SUM(ps.Value=-1),0) as Dislikes
+    FROM starmarks
+    JOIN posts ON starmarks.PostId = posts.id
+    JOIN users ON posts.UserId = users.id
+    JOIN userprofiles ON posts.UserId = userprofiles.UserId
+    LEFT JOIN postscore ps ON posts.id = ps.PostId
+    WHERE starmarks.UserId = ?
+    GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
+    ORDER BY starmarks.id DESC");
 $stmt->execute([$userId]);
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+<script src="js/feed.js" defer></script>
 <div class="feed-container">
     <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
-
     <div class="feed">
         <h1>&ltstarmarks&gt</h1>
-
         <?php if (empty($posts)): ?>
-        <p style="text-align:center">Nothing here yet... Go star some posts!</p>
+        <p style="text-align:center;opacity:0.6;padding:20px">Nothing here yet… go star some posts!</p>
         <?php endif; ?>
-
         <div class="post-feed">
-            <?php foreach($posts as $post): ?>
-            <div class="post-container" data-post-id="<?= $post['id'] ?>">
-                <a href="profile.php?id=<?= $post["UserId"] ?>" class="post-header no-underline">
-                    <img src="../uploads/pfp/<?= htmlspecialchars($post["ProfilePicture"]) ?>" class="post-profile-pic">
-                    <span class="post-username"><?= htmlspecialchars($post["Nickname"]) ?></span>
-                </a>
-
-                <div class="post-content">
-                    <p><?= htmlspecialchars($post["Text"]) ?></p>
-                </div>
-
-                <div class="post-button-container">
-                    <div>
-                        <button class="btn btn-icon like-btn">Like (<?= $post['Likes'] ?? 0 ?>)</button>
-                        <button class="btn btn-icon dislike-btn">Dislike (<?= $post['Dislikes'] ?? 0 ?>)</button>
-                        <button class="btn btn-icon comment-btn">Comment</button>
-                    </div>
-                    <div>
-                        <button class="btn btn-icon starmark-btn active">Star</button>
-                        <button class="btn btn-icon share-btn">Share</button>
-                    </div>
-                </div>
-
-            </div>
-            <?php endforeach; ?>
+            <?php foreach ($posts as $post):
+                $mstmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
+                $mstmt->execute([$post['id']]);
+                $mf = $mstmt->fetchAll(PDO::FETCH_COLUMN);
+                renderPostCard($post, $mf, null, 0, true);
+            endforeach; ?>
         </div>
     </div>
-
     <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 </div>
+
+
+
+<?php if (isset($_SESSION["user_id"])): ?>
+<?php require_once __DIR__ . '/../includes/createpost.php'; ?>
+
+<!--comment popout-->
+<div id="comment-popout" style="display:none" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+    <div class="p-container modal-box">
+        <div class="p-header">
+            <button onclick="document.getElementById('comment-popout').style.display='none'" class="btn btn-icon">✕</button>
+            <span class="post-username">Comments</span>
+        </div>
+        <div class="p-content">
+            <div id="comment-post-preview" class="comment-preview"></div>
+            <div id="comments-list" class="comment-thread" style="margin:10px 0;max-height:300px;overflow-y:auto"></div>
+            <form id="comment-form" action="../private/create-comment.php" method="post">
+                <input type="hidden" name="post_id" id="comment-post-id">
+                <div class="form-group">
+                    <textarea maxlength="300" name="comment-text" class="form-control" placeholder="Write a comment…" rows="2" style="resize:none"></textarea>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                    <input type="submit" class="btn btn-secondary btn-sm" value="Post comment">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--send post popout-->
+<?php 
+$profile = null;
+$following = [];
+if(isset($_SESSION["user_id"])) {
+    $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
+        FROM followingrelationships fr
+        JOIN users u ON fr.FollowedUserId = u.id
+        JOIN userprofiles up ON u.id = up.UserId
+        WHERE fr.UserId = ? LIMIT 30");
+    $stmt->execute([$_SESSION['user_id']]);
+    $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+?>
+<div id="send-popout" style="display:none" class="modal-overlay">
+    <div class="p-container modal-box">
+        <div class="p-header">
+            <button onclick="document.getElementById('send-popout').style.display='none'" class="btn btn-icon">✕</button>
+            <span class="post-username">Send post</span>
+        </div>
+        <div class="p-content">
+            <div class="send-options">
+                <button class="btn btn-secondary" id="copy-link-btn">&ltcopy link&gt</button>
+                <span id="copy-confirm" style="display:none;color:green">Copied!</span>
+            </div>
+            <p style="text-align:center;opacity:0.7">— or send to —</p>
+            <?php if (!empty($following)): ?>
+            <div class="follow-send-list">
+                <?php foreach ($following as $f): ?>
+                <div class="follow-item">
+                    <img src="../uploads/pfp/<?= htmlspecialchars($f['ProfilePicture']) ?>" class="post-profile-pic">
+                    <span><?= htmlspecialchars($f['Nickname']) ?></span>
+                    <button class="btn btn-secondary btn-sm send-to-user-btn" data-user-id="<?= $f['id'] ?>">&ltsend&gt</button>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php else: ?>
+            <p style="text-align:center;opacity:0.6">Follow people to send them posts!</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

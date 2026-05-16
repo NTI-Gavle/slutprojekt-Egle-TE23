@@ -124,7 +124,7 @@ h1,h2,h3,h4,p
     border-radius: 20px;
     color: var(--secondary-text-color);
 }
-#search-field {
+#search-field,#search-field-page {
     background: none;
     border: none;
     color: var(--secondary-text-color);
@@ -1110,12 +1110,12 @@ h1,h2,h3,h4,p
 
 /*Profile*/
 .profile-card { overflow: hidden; }
-.profile-background-container { width: 100%; padding: 0; }
+.profile-background-container { width: 100%; padding: 10px; }
 .profile-background { 
     width: 100%; 
     aspect-ratio: 4/1; 
     object-fit: cover; 
-    border-radius: 20px 20px 0 0; 
+    border-radius: 20px; 
     display: block; }
 .profile-card-body {
     display: flex;
@@ -1167,10 +1167,10 @@ h1,h2,h3,h4,p
 }
 .profile-tabs {
     display: flex;
-    gap: 4px;
+    justify-content: center;
+    gap: 20px;
     padding: 0 10px;
     margin: 10px 0 0;
-    border-bottom: 2px solid var(--border-color);
 }
 .profile-tab {
     padding: 8px 16px;

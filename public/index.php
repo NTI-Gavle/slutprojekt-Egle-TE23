@@ -17,7 +17,8 @@ switch ($feed) {
             JOIN users ON posts.UserId = users.id
             JOIN userprofiles ON posts.UserId = userprofiles.UserId
             LEFT JOIN postscore ON posts.id = postscore.PostId
-            GROUP BY posts.id ORDER BY posts.CreatedAt DESC LIMIT 50";
+            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture  
+            ORDER BY posts.CreatedAt DESC LIMIT 50";
         $stmt = $dbconn->prepare($sql); $stmt->execute();
         break;
     case 'top':
@@ -30,7 +31,7 @@ switch ($feed) {
             JOIN users ON posts.UserId = users.id
             JOIN userprofiles ON posts.UserId = userprofiles.UserId
             LEFT JOIN postscore ON posts.id = postscore.PostId
-            GROUP BY posts.id
+            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture 
             ORDER BY (Score / (TIMESTAMPDIFF(HOUR, posts.CreatedAt, NOW()) + 2)) DESC LIMIT 50";
         $stmt = $dbconn->prepare($sql); $stmt->execute();
         break;
@@ -45,7 +46,8 @@ switch ($feed) {
             JOIN userprofiles ON posts.UserId = userprofiles.UserId
             LEFT JOIN postscore ON posts.id = postscore.PostId
             WHERE posts.UserId IN (SELECT FollowedUserId FROM followingrelationships WHERE UserId = ?)
-            GROUP BY posts.id ORDER BY posts.CreatedAt DESC LIMIT 50";
+            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture 
+            ORDER BY posts.CreatedAt DESC LIMIT 50";
         $stmt = $dbconn->prepare($sql); $stmt->execute([$_SESSION['user_id']]);
         break;
     default: // discover
@@ -80,7 +82,7 @@ if ($loggedIn) {
     $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Fetch top comment + count per post
+//top comment
 $postIds = array_column($posts, 'id');
 $topComments = [];
 $commentCounts = [];

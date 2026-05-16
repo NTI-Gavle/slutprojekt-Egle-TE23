@@ -2,16 +2,17 @@
 $pageTitle = "Post";
 require_once __DIR__ . '/../includes/header.php';
 require_once('../private/dbconnection.php');
+require_once('../includes/functions.php');
 
+$loggedIn = isset($_SESSION['user_id']);
 $postId = (int)($_GET['id'] ?? 0);
 if (!$postId) { header("Location: index.php"); exit; }
 
-$stmt = $dbconn->prepare("SELECT posts.*,
-    ANY_VALUE(users.Username) AS Username,
+$stmt = $dbconn->prepare("SELECT posts.*, users.Username,
     ANY_VALUE(userprofiles.Nickname) AS Nickname,
     ANY_VALUE(userprofiles.ProfilePicture) AS ProfilePicture,
-    COALESCE(SUM(ps.Value = 1), 0) AS Likes,
-    COALESCE(SUM(ps.Value = -1), 0) AS Dislikes
+    COALESCE(SUM(ps.Value=1),0) AS Likes,
+    COALESCE(SUM(ps.Value=-1),0) AS Dislikes
     FROM posts
     JOIN users ON posts.UserId = users.id
     JOIN userprofiles ON posts.UserId = userprofiles.UserId
@@ -22,22 +23,29 @@ $stmt->execute([$postId]);
 $post = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$post) { header("Location: index.php"); exit; }
 
-//media
 $stmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
 $stmt->execute([$postId]);
 $mediaFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-//comments
-$stmt = $dbconn->prepare("SELECT comments.*, userprofiles.Nickname, userprofiles.ProfilePicture
-    FROM comments JOIN userprofiles ON comments.UserId = userprofiles.UserId
+$stmt = $dbconn->prepare("SELECT comments.*, users.Username,
+    userprofiles.Nickname, userprofiles.ProfilePicture
+    FROM comments
+    JOIN users ON comments.UserId = users.id
+    JOIN userprofiles ON comments.UserId = userprofiles.UserId
     WHERE comments.PostId = ?
     ORDER BY comments.CreatedAt ASC");
 $stmt->execute([$postId]);
 $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-//view
-if ($postId) {
-    $dbconn->prepare("UPDATE posts SET ViewCount = ViewCount + 1 WHERE id = ?")->execute([$postId]);
+// Increment view
+$dbconn->prepare("UPDATE posts SET ViewCount = ViewCount + 1 WHERE id = ?")->execute([$postId]);
+
+// Viewer profile for comment box
+$myProfile = null;
+if ($loggedIn) {
+    $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $myProfile = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
 <script src="js/feed.js" defer></script>
@@ -46,138 +54,145 @@ if ($postId) {
     <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
     <div class="feed">
-        <div class="post-container" data-post-id="<?= $post['id'] ?>">
-            <a href="profile.php?id=<?= $post['UserId'] ?>" class="post-header no-underline">
-                <img src="../uploads/pfp/<?= htmlspecialchars($post['ProfilePicture']) ?>" class="post-profile-pic">
-                <div>
-                    <span class="post-username"><?= htmlspecialchars($post['Nickname']) ?></span>
-                    <small style="display:block;opacity:0.6">@<?= htmlspecialchars($post['Username']) ?></small>
-                </div>
-                <span class="post-views">👁 <?= number_format($post['ViewCount'] ?? 0) ?></span>
-            </a>
-            <div class="post-content">
-                <p style="font-size:1.1em"><?= htmlspecialchars($post['Text']) ?></p>
-                <?php if (!empty($mediaFiles)): ?>
-                <div class="post-img-container">
-                    <?php foreach ($mediaFiles as $i => $file): ?>
-                    <img src="../uploads/media/<?= htmlspecialchars($file) ?>" class="post-media-img lightbox-trigger"
-                        data-index="<?= $i ?>" data-images='<?= htmlspecialchars(json_encode($mediaFiles)) ?>'
-                        alt="post image">
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-                <small style="opacity:0.5"><?= date('M j, Y g:i a', strtotime($post['CreatedAt'])) ?></small>
-            </div>
-            <div class="post-button-containesr">
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <div>
-                        <button class="btn btn-icon like-btn"><i class="fa-solid fa-thumbs-up"></i>
-                            <?= $post['Likes'] ?></button>
-                        <button class="btn btn-icon dislike-btn"><i class="fa-solid fa-thumbs-down"></i>
-                            <?= $post['Dislikes'] ?></button>
-                        <button class="btn btn-icon comment-btn"><i class="fa-solid fa-comment"></i> Comment</button>
-                    </div>
-                    <div>
-                        <button class="btn btn-icon starmark-btn"><i class="fa-solid fa-star"></i> Star</button>
-                        <button class="btn btn-icon share-btn"><i class="fa-solid fa-paper-plane"></i> Send</button>
-                    </div>
-                    <?php else: ?>
-                    <div>
-                        <a href="login.php" class="btn btn-icon">Like (<?= $post['Likes'] ?? 0 ?>)</a>
-                        <a href="login.php" class="btn btn-icon">Dislike (<?= $post['Dislikes'] ?? 0 ?>)</a>
-                        <a href="login.php" class="btn btn-icon">Comment</a>
-                    </div>
-                    <div>
-                        <a href="login.php" class="btn btn-icon">Star</a>
-                        <button class="btn btn-icon share-btn">Send</button>
-                    </div>
-                    <?php endif; ?>
-            </div>
-        </div>
+        <!--post-->
+        <?php renderPostCard($post, $mediaFiles, null, 0, $loggedIn); ?>
 
-        <!-- Comment form -->
-        <?php if (isset($_SESSION['user_id'])): ?>
-        <div class="post-container" style="padding:0">
-            <form action="../private/create-comment.php" method="post"
-                style="padding:15px;display:flex;flex-direction:column;gap:10px">
-                <input type="hidden" name="post_id" value="<?= $postId ?>">
-                <textarea name="comment-text" class="form-control" placeholder="Add a comment..." maxlength="300"
-                    rows="2" style="resize:none"></textarea>
-                <div style="display:flex;justify-content:flex-end">
-                    <button type="submit" class="btn btn-secondary btn-sm">&ltpost comment&gt</button>
-                </div>
-            </form>
+        <!--new comment -->
+        <?php if ($loggedIn && $myProfile): ?>
+        <div class="comment-compose">
+            <img src="../uploads/pfp/<?= htmlspecialchars($myProfile['ProfilePicture'] ?? 'default.png') ?>" alt="">
+            <div class="comment-compose-inner">
+                <form action="../private/create-comment.php" method="post">
+                    <input type="hidden" name="post_id" value="<?= $postId ?>">
+                    <textarea name="comment-text" placeholder="Add a comment…" maxlength="300" rows="2"
+                        class="form-control" style="border:none;background:none;color:var(--post-text-color);resize:none;outline:none;width:100%;font-family:monospace"></textarea>
+                    <div class="comment-compose-footer">
+                        <button type="submit" class="btn btn-secondary btn-sm">&ltpost comment&gt</button>
+                    </div>
+                </form>
+            </div>
         </div>
         <?php endif; ?>
 
-        <!-- Comments list -->
-        <div class="post-feed" style="margin-top:0">
+        <!--comments-->
+        <div class="post-card" style="padding:0;overflow:hidden">
             <?php if (empty($comments)): ?>
             <p style="text-align:center;opacity:0.6;padding:20px">No comments yet. Be the first!</p>
             <?php endif; ?>
-            <?php foreach ($comments as $c): ?>
-            <div class="post-container comment-post">
-                <div class="post-header" style="padding:8px 12px">
-                    <img src="../uploads/pfp/<?= htmlspecialchars($c['ProfilePicture']) ?>" class="post-profile-pic"
-                        style="width:36px;height:36px">
-                    <a href="profile.php?id=<?= $c['UserId'] ?>" class="post-username no-underline"
-                        style="font-size:1em"><?= htmlspecialchars($c['Nickname']) ?></a>
-                    <small
-                        style="margin-left:auto;opacity:0.5"><?= date('M j, g:i a', strtotime($c['CreatedAt'])) ?></small>
+            <div class="comment-thread">
+                <?php foreach ($comments as $i => $c): ?>
+                <div class="comment-thread-item">
+                    <div class="comment-thread-avatar">
+                        <a href="profile.php?id=<?= $c['UserId'] ?>">
+                            <img src="../uploads/pfp/<?= htmlspecialchars($c['ProfilePicture']) ?>" alt="">
+                        </a>
+                        <?php if ($i < count($comments) - 1): ?>
+                        <div class="comment-thread-line"></div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="comment-thread-body">
+                        <div class="comment-thread-meta">
+                            <a href="profile.php?id=<?= $c['UserId'] ?>" class="no-underline" style="color:inherit">
+                                <strong><?= htmlspecialchars($c['Nickname']) ?></strong>
+                            </a>
+                            <small>@<?= htmlspecialchars($c['Username']) ?></small>
+                            <small style="margin-left:auto"><?= date('M j, g:i a', strtotime($c['CreatedAt'])) ?></small>
+                        </div>
+                        <p class="comment-thread-text"><?= htmlspecialchars($c['Text']) ?></p>
+                    </div>
                 </div>
-                <div class="post-content" style="padding:10px 20px">
-                    <p><?= htmlspecialchars($c['Text']) ?></p>
-                </div>
+                <?php endforeach; ?>
             </div>
-            <?php endforeach; ?>
         </div>
     </div>
 
     <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 </div>
 
-<!-- Lightbox for images -->
+<?php if ($loggedIn): ?>
+<?php require_once __DIR__ . '/../includes/createpost.php'; ?>
+
+<!--comment popout-->
+<div id="comment-popout" style="display:none" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+    <div class="p-container modal-box">
+        <div class="p-header">
+            <button onclick="document.getElementById('comment-popout').style.display='none'" class="btn btn-icon">✕</button>
+            <span class="post-username">Comments</span>
+        </div>
+        <div class="p-content">
+            <div id="comment-post-preview" class="comment-preview"></div>
+            <div id="comments-list" class="comment-thread" style="margin:10px 0;max-height:300px;overflow-y:auto"></div>
+            <form id="comment-form" action="../private/create-comment.php" method="post">
+                <input type="hidden" name="post_id" id="comment-post-id">
+                <div class="form-group">
+                    <textarea maxlength="300" name="comment-text" class="form-control" placeholder="Write a comment…" rows="2" style="resize:none"></textarea>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                    <input type="submit" class="btn btn-secondary btn-sm" value="Post comment">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--send post popout-->
+<?php 
+$profile = null;
+$following = [];
+if ($loggedIn) {
+    $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
+        FROM followingrelationships fr
+        JOIN users u ON fr.FollowedUserId = u.id
+        JOIN userprofiles up ON u.id = up.UserId
+        WHERE fr.UserId = ? LIMIT 30");
+    $stmt->execute([$_SESSION['user_id']]);
+    $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+?>
+<div id="send-popout" style="display:none" class="modal-overlay">
+    <div class="p-container modal-box">
+        <div class="p-header">
+            <button onclick="document.getElementById('send-popout').style.display='none'" class="btn btn-icon">✕</button>
+            <span class="post-username">Send post</span>
+        </div>
+        <div class="p-content">
+            <div class="send-options">
+                <button class="btn btn-secondary" id="copy-link-btn">&ltcopy link&gt</button>
+                <span id="copy-confirm" style="display:none;color:green">Copied!</span>
+            </div>
+            <p style="text-align:center;opacity:0.7">— or send to —</p>
+            <?php if (!empty($following)): ?>
+            <div class="follow-send-list">
+                <?php foreach ($following as $f): ?>
+                <div class="follow-item">
+                    <img src="../uploads/pfp/<?= htmlspecialchars($f['ProfilePicture']) ?>" class="post-profile-pic">
+                    <span><?= htmlspecialchars($f['Nickname']) ?></span>
+                    <button class="btn btn-secondary btn-sm send-to-user-btn" data-user-id="<?= $f['id'] ?>">&ltsend&gt</button>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php else: ?>
+            <p style="text-align:center;opacity:0.6">Follow people to send them posts!</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+
+<!--lightbox-->
 <div id="lightbox" style="display:none" class="modal-overlay" onclick="if(event.target===this)closeLightbox()">
     <div class="lightbox-box">
         <button class="lightbox-btn lightbox-prev" onclick="lightboxStep(-1)">&#8249;</button>
-        <img id="lightbox-img" src="" alt="full size"
-            style="max-width:90vw;max-height:85vh;border-radius:10px;object-fit:contain">
+        <img id="lightbox-img" src="" alt="full size" style="max-width:90vw;max-height:85vh;border-radius:10px;object-fit:contain">
         <button class="lightbox-btn lightbox-next" onclick="lightboxStep(1)">&#8250;</button>
         <button class="lightbox-close" onclick="closeLightbox()">✕</button>
     </div>
 </div>
-
-<script>
-let lbImages = [],
-    lbIndex = 0;
-document.querySelectorAll('.lightbox-trigger').forEach(img => {
-    img.addEventListener('click', () => {
-        lbImages = JSON.parse(img.dataset.images);
-        lbIndex = parseInt(img.dataset.index);
-        openLightbox();
-    });
-});
-
-function openLightbox() {
-    document.getElementById('lightbox-img').src = '../uploads/media/' + lbImages[lbIndex];
-    document.getElementById('lightbox').style.display = 'flex';
-}
-
-function closeLightbox() {
-    document.getElementById('lightbox').style.display = 'none';
-}
-
-function lightboxStep(dir) {
-    lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length;
-    openLightbox();
-}
-document.addEventListener('keydown', e => {
-    if (document.getElementById('lightbox').style.display === 'flex') {
-        if (e.key === 'ArrowRight') lightboxStep(1);
-        if (e.key === 'ArrowLeft') lightboxStep(-1);
-        if (e.key === 'Escape') closeLightbox();
-    }
-});
-</script>
+<script defer src="js/lightbox.js"></script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

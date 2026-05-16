@@ -193,4 +193,8 @@ $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
+<?php if(isset($_SESSION["user_id"])): ?>
+<?php require_once __DIR__ . '/../includes/createpost.php'; ?>
+<?php endif;?>
+
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
