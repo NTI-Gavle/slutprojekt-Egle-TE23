@@ -112,8 +112,8 @@ if (isset($_SESSION["user_id"])) {
     </div>
 </div>
 <!--send post popout-->
-<div id="send-popout" style="display:none">
-    <div class="p-container create-post-container">
+<div id="send-popout" style="display:none" class="modal-overlay">
+    <div class="p-container modal-box">
         <div class="p-header">
             <button onclick="document.getElementById('send-popout').style.display='none'" class="btn btn-icon">✕</button>
             <span class="post-username">Send post</span>

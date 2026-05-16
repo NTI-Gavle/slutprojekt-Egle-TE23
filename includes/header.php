@@ -21,6 +21,7 @@ if(session_status() !== PHP_SESSION_ACTIVE)
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous">
     </script>
+    <script src="https://kit.fontawesome.com/ca782e9691.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="css/styles.css">
     <script src="js/app.js" defer></script>
     <script src="js/stars.js" defer></script>

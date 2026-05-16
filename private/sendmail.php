@@ -31,7 +31,7 @@ function sendMail($to, $subject, $body, $altBody = '', $attachments = [])
         $mail->Port       = 587;                     // 587 (tls) or 465 (ssl)
 
         /* ---------- SENDER ---------- */
-        $mail->setFrom('ntimailsender@gmail.com', 'LO-GO Quiz');
+        $mail->setFrom('ntimailsender@gmail.com', 'LO-GO');
 
         /* ---------- RECIPIENT(S) ---------- */
         if (is_array($to)) {

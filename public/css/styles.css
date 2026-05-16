@@ -519,39 +519,86 @@ h1,h2,h3,h4,p
 }
 
 /*Profile*/
-.profile-container{
-    display: grid;
-    grid-template-columns: 30% auto;
-}
-.profile-pic{
-    position: relative;
-    top: -50%;
-    width: 70%;
-    margin: auto;
-    border-radius: 400px;
-    aspect-ratio: 1;
-    object-fit: cover;
-}
-.profile-background-container{
-    grid-column: span 2;
-    padding: 10px;
-}
-.profile-background{
-    width: 100%;
-    border-radius: 10px;
-    aspect-ratio: 3;
-    object-fit: cover;
-}
-.profile-name{
+.profile-card { overflow: hidden; }
+.profile-background-container { width: 100%; padding: 0; }
+.profile-background { 
+    width: 100%; 
+    aspect-ratio: 4/1; 
+    object-fit: cover; 
+    border-radius: 20px 20px 0 0; 
+    display: block; }
+.profile-card-body {
     display: flex;
-    justify-content: space-between;
-    position: relative;
-    padding: 10px 30px 0px 0px ;
+    gap: 16px;
+    padding: 0 20px 20px;
+    align-items: flex-start;
 }
-.profile-description{
-    grid-column: span 2;
-    padding: 40px;
+.profile-pic-large {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+    margin-top: -40px;
+    flex-shrink: 0;
 }
+.profile-info { 
+    flex: 1; display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    padding-top: 8px; 
+}
+.profile-name-row { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+    gap: 10px; 
+}
+.profile-bio { 
+    opacity: 0.8; 
+    font-size: 0.9em; 
+    margin: 0; 
+    color: var(--post-text-color); 
+}
+.profile-stats-row { 
+    display: flex; 
+    gap: 16px; }
+.btn-stat {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--post-text-color);
+    font-family: monospace;
+    font-size: 0.9em;
+    padding: 0;
+}
+.btn-stat:hover { 
+    text-decoration: underline; 
+}
+.profile-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 10px;
+    margin: 10px 0 0;
+    border-bottom: 2px solid var(--border-color);
+}
+.profile-tab {
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    text-decoration: none;
+    color: var(--post-text-color);
+    opacity: 0.6;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+.profile-tab.active { 
+    background: var(--secondary-color); 
+    color: var(--secondary-text-color); opacity: 1; 
+}
+.profile-tab:hover:not(.active) {
+    opacity: 1; 
+}
+ 
 
 /*Settings*/
 .settings-container{

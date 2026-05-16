@@ -36,7 +36,7 @@ if ($query !== '') {
 //recent
 $recentSearches = [];
 if (isset($_SESSION['user_id'])) {
-    $stmt = $dbconn->prepare("SELECT Id, SearchTerm FROM searchterms WHERE UserId = ? AND Type = 'user' ORDER BY Id DESC LIMIT 10");
+    $stmt = $dbconn->prepare("SELECT Id, SearchTerm FROM searchterms WHERE UserId = ? AND Type = 'user' ORDER BY Id DESC LIMIT 5");
     $stmt->execute([$_SESSION['user_id']]);
     $recentSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }

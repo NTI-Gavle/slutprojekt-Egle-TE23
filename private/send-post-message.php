@@ -25,7 +25,7 @@ $stmt->execute([$senderId, $receiverId, $receiverId, $senderId]);
 $conv = $stmt->fetch();
 
 if ($conv) {
-    $convId = $conv['Id'];
+    $convId = $conv['id'];
 } else {
     $stmt = $dbconn->prepare("INSERT INTO conversations (UserId, ContactUserId) VALUES (?, ?)");
     $stmt->execute([$senderId, $receiverId]);
@@ -34,7 +34,7 @@ if ($conv) {
 
 //send message
 $postUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/public/post.php?id=' . $postId;
-$text = "📌 Shared a post: " . $postUrl;
+$text = "Shared a post: " . $postUrl;
 $stmt = $dbconn->prepare("INSERT INTO messages (ConversationId, SenderId, ReceiverId, Text, TimeSent) VALUES (?, ?, ?, ?, NOW())");
 $stmt->execute([$convId, $senderId, $receiverId, $text]);
 

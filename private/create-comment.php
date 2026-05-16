@@ -15,5 +15,5 @@ if ($postId && $text !== '' && mb_strlen($text) <= 300) {
 
 //takes back to previus page
 $ref = $_SERVER['HTTP_REFERER'] ?? '../public/index.php';
-header("Location: " . $ref);
+header("Location:".$ref);
 exit;
