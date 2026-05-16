@@ -21,7 +21,7 @@ $myProfile = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_chat_user_id'])) {
     $targetId = (int)$_POST['new_chat_user_id'];
 
-    $stmt = $dbconn->prepare("SELECT Id FROM conversations 
+    $stmt = $dbconn->prepare("SELECT id FROM conversations 
     WHERE (UserId = ? AND ContactUserId = ?) 
     OR (UserId = ? AND ContactUserId = ?) 
     LIMIT 1 ");
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_chat_user_id'])) 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_conversation'])) {
     $delId = (int)$_POST['delete_conversation'];
 
-    $stmt = $dbconn->prepare("DELETE FROM conversations WHERE Id = ? AND (UserId = ? OR ContactUserId = ?)");
+    $stmt = $dbconn->prepare("DELETE FROM conversations WHERE id = ? AND (UserId = ? OR ContactUserId = ?)");
     $stmt->execute([$delId, $userId, $userId]);
     header("Location: chat.php");
     exit;
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_conversation']
 $stmt = $dbconn->prepare("SELECT conversations.*,CASE WHEN conversations.UserId = ? THEN conversations.ContactUserId 
     ELSE conversations.UserId END AS OtherUserId
     FROM conversations WHERE conversations.UserId = ? OR conversations.ContactUserId = ?
-    ORDER BY conversations.Id DESC
+    ORDER BY conversations.id DESC
 ");
 $stmt->execute([$userId, $userId, $userId]);
 $conversations = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -60,7 +60,7 @@ $conversations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach ($conversations as &$conv) 
 {
     $stmt = $dbconn->prepare("SELECT u.Username, up.Nickname, up.ProfilePicture 
-    FROM users u JOIN userprofiles up ON u.Id = up.UserId WHERE u.Id = ?");
+    FROM users u JOIN userprofiles up ON u.id = up.UserId WHERE u.id = ?");
     $stmt->execute([$conv['OtherUserId']]);
     $conv['OtherProfile'] = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -74,7 +74,7 @@ unset($conv);
 if ($conversationId)
 {
     $stmt = $dbconn->prepare("SELECT *, CASE WHEN UserId = ? THEN ContactUserId 
-    ELSE UserId END AS OtherUserId FROM conversations WHERE Id = ? AND (UserId = ? OR ContactUserId = ?)");
+    ELSE UserId END AS OtherUserId FROM conversations WHERE id = ? AND (UserId = ? OR ContactUserId = ?)");
     $stmt->execute([$userId, $conversationId, $userId, $userId]);
     $convo = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$convo) {
@@ -82,7 +82,7 @@ if ($conversationId)
         exit;
     }
     $stmt = $dbconn->prepare("SELECT u.Username, up.Nickname, up.ProfilePicture 
-    FROM users u JOIN userprofiles up ON u.Id = up.UserId WHERE u.Id = ?");
+    FROM users u JOIN userprofiles up ON u.id = up.UserId WHERE u.id = ?");
     $stmt->execute([$convo['OtherUserId']]);
     $otherUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -91,34 +91,36 @@ if ($conversationId)
     $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$stmt = $dbconn->prepare("SELECT u.Id, u.Username, up.Nickname, up.ProfilePicture
+$stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
     FROM followingrelationships fr
-    JOIN users u ON fr.FollowedUserId = u.Id
-    JOIN userprofiles up ON u.Id = up.UserId
+    JOIN users u ON fr.FollowedUserId = u.id
+    JOIN userprofiles up ON u.id = up.UserId
     WHERE fr.UserId = ?");
 $stmt->execute([$userId]);
 $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <script src="js/chat.js" defer></script>
+<script>document.body.dataset.userId = '<?= $userId ?>';</script>
+ 
 <div class="chat-page-container">
-
+ 
     <div class="chat-sidebar">
         <div class="chat-sidebar-header">
-            <h2>&ltmessages&gt</h2>
+            <h2><i class="fa-solid fa-comment"></i> &ltmessages&gt</h2>
             <button class="btn btn-secondary btn-sm" onclick="document.getElementById('new-chat-modal').style.display='flex'">&ltnew&gt</button>
         </div>
-
+ 
         <?php if (empty($conversations)): ?>
             <p class="chat-empty">No conversations yet.</p>
         <?php endif; ?>
-
+ 
         <?php foreach ($conversations as $conv): ?>
         <div class="chat-list-item <?= $conversationId == $conv['id'] ? 'active' : '' ?>">
             <a href="chat.php?conversation=<?= $conv['id'] ?>" class="chat-list-link no-underline">
                 <img src="../uploads/pfp/<?= htmlspecialchars($conv['OtherProfile']['ProfilePicture'] ?? 'default.png') ?>" class="post-profile-pic">
                 <div class="chat-list-info">
-                    <span class="post-username"><?= htmlspecialchars($conv['OtherProfile']['Nickname'] ?? '') ?></span>
+                    <span class="post-username" style="font-size:1em"><?= htmlspecialchars($conv['OtherProfile']['Nickname'] ?? '') ?></span>
                     <span class="chat-preview"><?= htmlspecialchars(mb_strimwidth($conv['LatestMessage'], 0, 35, '...')) ?></span>
                 </div>
             </a>
@@ -129,12 +131,10 @@ $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <?php endforeach; ?>
     </div>
-
+ 
     <div class="chat-main">
         <?php if (!$conversationId): ?>
-            <div class="no-chat">
-                <p>Select a conversation or start a new one.</p>
-            </div>
+            <div class="no-chat"><p>Select a conversation or start a new one.</p></div>
         <?php else: ?>
             <div class="chat-header post-header">
                 <img src="../uploads/pfp/<?= htmlspecialchars($otherUser['ProfilePicture'] ?? 'default.png') ?>" class="post-profile-pic">
@@ -143,10 +143,10 @@ $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <small>@<?= htmlspecialchars($otherUser['Username'] ?? '') ?></small>
                 </a>
             </div>
-
+ 
             <div class="chat-messages" id="chat-messages">
                 <?php foreach ($messages as $msg): ?>
-                <div class="message-bubble <?= $msg['SenderId'] == $userId ? 'sent' : 'received' ?>">
+                <div class="message-bubble <?= $msg['SenderId'] == $userId ? 'sent' : 'received' ?>" data-msg-id="<?= $msg['id'] ?>">
                     <p><?= htmlspecialchars($msg['Text']) ?></p>
                     <span class="message-time"><?= date('H:i', strtotime($msg['TimeSent'])) ?></span>
                 </div>
@@ -164,10 +164,10 @@ $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         <?php endif; ?>
     </div>
-
+ 
     <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 </div>
-
+<!--new chat-->
 <div id="new-chat-modal" style="display:none" class="modal-overlay">
     <div class="p-container modal-box">
         <div class="p-header">
@@ -179,7 +179,7 @@ $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div id="follow-list">
                 <?php foreach ($following as $f): ?>
                 <form method="POST" action="chat.php" class="follow-item">
-                    <input type="hidden" name="new_chat_user_id" value="<?= $f['Id'] ?>">
+                    <input type="hidden" name="new_chat_user_id" value="<?= $f['id'] ?>">
                     <img src="../uploads/pfp/<?= htmlspecialchars($f['ProfilePicture']) ?>" class="post-profile-pic">
                     <span><?= htmlspecialchars($f['Nickname']) ?> <small>@<?= htmlspecialchars($f['Username']) ?></small></span>
                     <button type="submit" class="btn btn-secondary btn-sm">&ltchat&gt</button>
