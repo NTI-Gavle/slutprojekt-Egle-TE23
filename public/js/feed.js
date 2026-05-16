@@ -1,90 +1,101 @@
 document.addEventListener("click", async (e) => {
-    const post = e.target.closest(".post-container");
+    const post = e.target.closest(".post-card, .post-container");
     if (!post) return;
     const postId = post.dataset.postId;
+    if (!postId) return;
 
-    const likeBtn = e.target.closest(".like-btn");
+    const likeBtn    = e.target.closest(".like-btn");
     const dislikeBtn = e.target.closest(".dislike-btn");
-    const starBtn = e.target.closest(".starmark-btn");
+    const starBtn    = e.target.closest(".starmark-btn");
+    const commentBtn = e.target.closest(".comment-btn, .post-comment-count-bar, .post-preview-comment, .post-comment-count");
+    const shareBtn   = e.target.closest(".share-btn");
 
     //like dislike
-if (likeBtn || dislikeBtn) {
-    const btn = likeBtn || dislikeBtn;
-    const value = likeBtn ? 1 : -1;
-    const res = await fetch("../private/score.php", {
-        method: "POST",
-        body: new URLSearchParams({ post_id: postId, value })
-    });
-
-    const data = await res.json();
-    post.querySelector(".like-btn").innerHTML = `<i class="fa-solid fa-thumbs-up"></i> ${data.likes ?? 0}`;
-    post.querySelector(".dislike-btn").innerHTML = `<i class="fa-solid fa-thumbs-down"></i> ${data.dislikes ?? 0}`;
-}
+    if (likeBtn || dislikeBtn) {
+        const value = likeBtn ? 1 : -1;
+        const res = await fetch("../private/score.php", {
+            method: "POST",
+            body: new URLSearchParams({ post_id: postId, value })
+        });
+        const data = await res.json();
+        const lb = post.querySelector(".like-btn");
+        const db = post.querySelector(".dislike-btn");
+        if (lb) lb.innerHTML = `<i class="fa-solid fa-thumbs-up"></i> ${data.likes ?? 0}`;
+        if (db) db.innerHTML = `<i class="fa-solid fa-thumbs-down"></i> ${data.dislikes ?? 0}`;
+        return;
+    }
 
     //star
-if (starBtn) {
-    const res = await fetch("../private/starmark.php", {
-        method: "POST",
-        body: new URLSearchParams({ post_id: postId })
-    });
-    const data = await res.json();
-    const isStarred = data.starred;
-    starBtn.classList.toggle("active", isStarred);
-    starBtn.innerHTML = isStarred
-        ? "<i class='fa-solid fa-star'></i>"
-        : "<i class='fa-regular fa-star'></i>";
-}
+    if (starBtn) {
+        const res = await fetch("../private/starmark.php", {
+            method: "POST",
+            body: new URLSearchParams({ post_id: postId })
+        });
+        const data = await res.json();
+        starBtn.classList.toggle("active", data.starred);
+        starBtn.innerHTML = data.starred
+            ? "<i class='fa-solid fa-star'></i>"
+            : "<i class='fa-regular fa-star'></i>";
+        return;
+    }
 
     //comment
-    if (e.target.classList.contains("comment-btn") || e.target.classList.contains("post-comment-count")) {
+    if (commentBtn) {
         const popout = document.getElementById("comment-popout");
         if (!popout) return;
         document.getElementById("comment-post-id").value = postId;
-
-        const postText = post.querySelector(".post-content p")?.textContent ?? "";
+        const postText = post.querySelector(".post-body p, .post-content p")?.textContent ?? "";
         document.getElementById("comment-post-preview").textContent = postText;
 
         const commentsList = document.getElementById("comments-list");
-        commentsList.innerHTML = "<p style='opacity:0.6;text-align:center'>Loading...</p>";
+        commentsList.innerHTML = "<p style='opacity:0.6;text-align:center;padding:10px'>Loading…</p>";
         popout.style.display = "flex";
 
         const res = await fetch("../private/get-comments.php?post_id=" + postId);
         const data = await res.json();
-        if (data.length === 0) {
-            commentsList.innerHTML = "<p style='opacity:0.6;text-align:center'>No comments yet.</p>";
+        if (!data.length) {
+            commentsList.innerHTML = "<p style='opacity:0.6;text-align:center;padding:10px'>No comments yet.</p>";
         } else {
-            commentsList.innerHTML = data.map(c => `
-                <div class="comment-item">
-                    <img src="../uploads/pfp/${escHtml(c.ProfilePicture)}" class="post-profile-pic" style="width:32px;height:32px;flex-shrink:0">
-                    <div>
-                        <strong>${escHtml(c.Nickname)}</strong>
-                        <p>${escHtml(c.Text)}</p>
+            commentsList.innerHTML = data.map((c, i) => `
+                <div class="comment-thread-item">
+                    <div class="comment-thread-avatar">
+                        <img src="../uploads/pfp/${escHtml(c.ProfilePicture)}" alt="">
+                        ${i < data.length - 1 ? '<div class="comment-thread-line"></div>' : ''}
+                    </div>
+                    <div class="comment-thread-body">
+                        <div class="comment-thread-meta">
+                            <strong>${escHtml(c.Nickname)}</strong>
+                            <small style="opacity:0.5;font-size:0.78em">${formatTime(c.CreatedAt)}</small>
+                        </div>
+                        <p class="comment-thread-text">${escHtml(c.Text)}</p>
                     </div>
                 </div>
-            `).join("");
+            `).join('');
         }
+        return;
     }
 
     //share
-    if (e.target.classList.contains("share-btn")) {
+    if (shareBtn) {
         const sendPopout = document.getElementById("send-popout");
         if (!sendPopout) {
             const url = window.location.origin + "/public/post.php?id=" + postId;
-            prompt("Copy this link:", url);
+            navigator.clipboard?.writeText(url);
             return;
         }
         sendPopout.dataset.postId = postId;
         sendPopout.style.display = "flex";
 
-        document.getElementById("copy-link-btn").onclick = () => {
-            const url = window.location.origin + "/public/post.php?id=" + postId;
-            navigator.clipboard.writeText(url).then(() => {
-                const confirm = document.getElementById("copy-confirm");
-                confirm.style.display = "inline";
-                setTimeout(() => confirm.style.display = "none", 2000);
-            });
-        };
-
+        const copyBtn = document.getElementById("copy-link-btn");
+        if (copyBtn) {
+            copyBtn.onclick = () => {
+                const url = window.location.origin + "/public/post.php?id=" + postId;
+                navigator.clipboard.writeText(url).then(() => {
+                    const confirm = document.getElementById("copy-confirm");
+                    if (confirm) { confirm.style.display = "inline"; setTimeout(() => confirm.style.display = "none", 2000); }
+                });
+            };
+        }
         document.querySelectorAll(".send-to-user-btn").forEach(btn => {
             btn.onclick = async () => {
                 const receiverId = btn.dataset.userId;
@@ -96,6 +107,7 @@ if (starBtn) {
                 if (data.ok) { btn.textContent = "✓ Sent!"; btn.disabled = true; }
             };
         });
+        return;
     }
 });
 
@@ -116,9 +128,15 @@ if ('IntersectionObserver' in window) {
             }
         });
     }, { threshold: 0.5 });
-    document.querySelectorAll(".post-container[data-post-id]").forEach(p => observer.observe(p));
+    document.querySelectorAll(".post-card[data-post-id], .post-container[data-post-id]").forEach(p => observer.observe(p));
 }
 
 function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function formatTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts.replace(' ', 'T'));
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
