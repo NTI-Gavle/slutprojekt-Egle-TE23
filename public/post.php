@@ -6,21 +6,24 @@ require_once('../private/dbconnection.php');
 $postId = (int)($_GET['id'] ?? 0);
 if (!$postId) { header("Location: index.php"); exit; }
 
-$stmt = $dbconn->prepare("SELECT posts.*, users.Username, userprofiles.Nickname, userprofiles.ProfilePicture,
-    COALESCE(SUM(ps.Value=1),0) as Likes,
-    COALESCE(SUM(ps.Value=-1),0) as Dislikes
+$stmt = $dbconn->prepare("SELECT posts.*,
+    ANY_VALUE(users.Username) AS Username,
+    ANY_VALUE(userprofiles.Nickname) AS Nickname,
+    ANY_VALUE(userprofiles.ProfilePicture) AS ProfilePicture,
+    COALESCE(SUM(ps.Value = 1), 0) AS Likes,
+    COALESCE(SUM(ps.Value = -1), 0) AS Dislikes
     FROM posts
-    JOIN users ON posts.UserId = users.Id
+    JOIN users ON posts.UserId = users.id
     JOIN userprofiles ON posts.UserId = userprofiles.UserId
-    LEFT JOIN postscore ps ON posts.Id = ps.PostId
-    WHERE posts.Id = ?
-    GROUP BY posts.Id ");
+    LEFT JOIN postscore ps ON posts.id = ps.PostId
+    WHERE posts.id = ?
+    GROUP BY posts.id");
 $stmt->execute([$postId]);
 $post = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$post) { header("Location: index.php"); exit; }
 
 //media
-$stmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY Id");
+$stmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
 $stmt->execute([$postId]);
 $mediaFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -34,7 +37,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 //view
 if ($postId) {
-    $dbconn->prepare("UPDATE posts SET ViewCount = ViewCount + 1 WHERE Id = ?")->execute([$postId]);
+    $dbconn->prepare("UPDATE posts SET ViewCount = ViewCount + 1 WHERE id = ?")->execute([$postId]);
 }
 ?>
 <script src="js/feed.js" defer></script>
@@ -43,7 +46,7 @@ if ($postId) {
     <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
 
     <div class="feed">
-        <div class="post-container" data-post-id="<?= $post['Id'] ?>">
+        <div class="post-container" data-post-id="<?= $post['id'] ?>">
             <a href="profile.php?id=<?= $post['UserId'] ?>" class="post-header no-underline">
                 <img src="../uploads/pfp/<?= htmlspecialchars($post['ProfilePicture']) ?>" class="post-profile-pic">
                 <div>
@@ -65,28 +68,30 @@ if ($postId) {
                 <?php endif; ?>
                 <small style="opacity:0.5"><?= date('M j, Y g:i a', strtotime($post['CreatedAt'])) ?></small>
             </div>
-            <div class="post-button-container">
+            <div class="post-button-containesr">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                <div>
-                    <button class="btn btn-icon like-btn">Like (<?= $post['Likes'] ?? 0 ?>)</button>
-                    <button class="btn btn-icon dislike-btn">Dislike (<?= $post['Dislikes'] ?? 0 ?>)</button>
-                    <button class="btn btn-icon comment-btn">Comment</button>
-                </div>
-                <div>
-                    <button class="btn btn-icon starmark-btn">Star</button>
-                    <button class="btn btn-icon share-btn">Send</button>
-                </div>
-                <?php else: ?>
-                <div>
-                    <a href="login.php" class="btn btn-icon">Like (<?= $post['Likes'] ?? 0 ?>)</a>
-                    <a href="login.php" class="btn btn-icon">Dislike (<?= $post['Dislikes'] ?? 0 ?>)</a>
-                    <a href="login.php" class="btn btn-icon">Comment</a>
-                </div>
-                <div>
-                    <a href="login.php" class="btn btn-icon">Star</a>
-                    <button class="btn btn-icon share-btn">Send</button>
-                </div>
-                <?php endif; ?>
+                    <div>
+                        <button class="btn btn-icon like-btn"><i class="fa-solid fa-thumbs-up"></i>
+                            <?= $post['Likes'] ?></button>
+                        <button class="btn btn-icon dislike-btn"><i class="fa-solid fa-thumbs-down"></i>
+                            <?= $post['Dislikes'] ?></button>
+                        <button class="btn btn-icon comment-btn"><i class="fa-solid fa-comment"></i> Comment</button>
+                    </div>
+                    <div>
+                        <button class="btn btn-icon starmark-btn"><i class="fa-solid fa-star"></i> Star</button>
+                        <button class="btn btn-icon share-btn"><i class="fa-solid fa-paper-plane"></i> Send</button>
+                    </div>
+                    <?php else: ?>
+                    <div>
+                        <a href="login.php" class="btn btn-icon">Like (<?= $post['Likes'] ?? 0 ?>)</a>
+                        <a href="login.php" class="btn btn-icon">Dislike (<?= $post['Dislikes'] ?? 0 ?>)</a>
+                        <a href="login.php" class="btn btn-icon">Comment</a>
+                    </div>
+                    <div>
+                        <a href="login.php" class="btn btn-icon">Star</a>
+                        <button class="btn btn-icon share-btn">Send</button>
+                    </div>
+                    <?php endif; ?>
             </div>
         </div>
 
