@@ -889,9 +889,10 @@ h1,h2,h3,h4,p
 .post-card .post-img-grid.count-4 { grid-template-columns: 1fr 1fr; }
 .post-card .post-img-grid img {
     width: 100%;
-    aspect-ratio: 16/9;
+    aspect-ratio: 1;
     object-fit: cover;
     border-radius: 10px;
+    padding-top:5px;
     cursor: pointer;
     transition: opacity 0.15s;
 }
