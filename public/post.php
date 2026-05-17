@@ -1,63 +1,94 @@
 <?php
+/**
+ * post.php
+ * Displays a single post in full detail
+ */
+
 $pageTitle = "Post";
 require_once __DIR__ . '/../includes/header.php';
 require_once('../private/dbconnection.php');
 require_once('../includes/functions.php');
 
 $loggedIn = isset($_SESSION['user_id']);
-$postId = (int)($_GET['id'] ?? 0);
-if (!$postId) { header("Location: index.php"); exit; }
+$postId   = (int)($_GET['id'] ?? 0);
 
-$stmt = $dbconn->prepare("SELECT posts.*, users.Username,
+if (!$postId) {
+    header("Location: index.php");
+    exit;
+}
+
+//post data
+$stmt = $dbconn->prepare( "SELECT posts.*, users.Username,
     ANY_VALUE(userprofiles.Nickname) AS Nickname,
     ANY_VALUE(userprofiles.ProfilePicture) AS ProfilePicture,
-    COALESCE(SUM(ps.Value=1),0) AS Likes,
-    COALESCE(SUM(ps.Value=-1),0) AS Dislikes
-    FROM posts
-    JOIN users ON posts.UserId = users.id
+    COALESCE(SUM(ps.Value=1), 0) AS Likes,
+    COALESCE(SUM(ps.Value=-1), 0)  AS Dislikes
+    FROM posts JOIN users ON posts.UserId = users.id
     JOIN userprofiles ON posts.UserId = userprofiles.UserId
     LEFT JOIN postscore ps ON posts.id = ps.PostId
-    WHERE posts.id = ?
-    GROUP BY posts.id");
+    WHERE posts.id = ? GROUP BY posts.id");
 $stmt->execute([$postId]);
 $post = $stmt->fetch(PDO::FETCH_ASSOC);
-if (!$post) { header("Location: index.php"); exit; }
 
+if (!$post) {
+    header("Location: index.php");
+    exit;
+}
+
+//media
 $stmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
 $stmt->execute([$postId]);
 $mediaFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-$stmt = $dbconn->prepare("SELECT comments.*, users.Username,
-    userprofiles.Nickname, userprofiles.ProfilePicture
-    FROM comments
-    JOIN users ON comments.UserId = users.id
-    JOIN userprofiles ON comments.UserId = userprofiles.UserId
-    WHERE comments.PostId = ?
-    ORDER BY comments.CreatedAt ASC");
+//comments
+$stmt = $dbconn->prepare(
+    "SELECT comments.*, users.Username, userprofiles.Nickname, userprofiles.ProfilePicture
+     FROM comments JOIN users ON comments.UserId = users.id
+     JOIN userprofiles ON comments.UserId = userprofiles.UserId
+     WHERE comments.PostId = ? ORDER BY comments.CreatedAt ASC");
 $stmt->execute([$postId]);
 $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Increment view
+//+1 view
 $dbconn->prepare("UPDATE posts SET ViewCount = ViewCount + 1 WHERE id = ?")->execute([$postId]);
 
-// Viewer profile for comment box
+//user provile
 $myProfile = null;
 if ($loggedIn) {
     $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $myProfile = $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
+//owner and admin can delete
+$canDelete = $loggedIn && (
+    (int)$post['UserId'] === (int)$_SESSION['user_id']
+    || !empty($_SESSION['is_admin'])
+);
 ?>
 <script src="js/feed.js" defer></script>
 
 <div class="feed-container">
     <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
-
     <div class="feed">
         <!--post-->
         <?php renderPostCard($post, $mediaFiles, null, 0, $loggedIn); ?>
 
-        <!--new comment -->
+        <!--delete button-->
+        <?php if ($canDelete): ?>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+            <form action="../private/delete-post.php" method="POST"
+                  onsubmit="return confirm('Delete this post? This cannot be undone.')">
+                <input type="hidden" name="post_id" value="<?= $postId ?>">
+                <button type="submit" class="btn btn-sm"
+                        style="background:#e74c3c;color:#fff;border-radius:20px;border:none;cursor:pointer">
+                    <i class="fa-solid fa-trash"></i> Delete post
+                </button>
+            </form>
+        </div>
+        <?php endif; ?>
+
+        <!--new comment-->
         <?php if ($loggedIn && $myProfile): ?>
         <div class="comment-compose">
             <img src="../uploads/pfp/<?= htmlspecialchars($myProfile['ProfilePicture'] ?? 'default.png') ?>" alt="">
@@ -65,7 +96,9 @@ if ($loggedIn) {
                 <form action="../private/create-comment.php" method="post">
                     <input type="hidden" name="post_id" value="<?= $postId ?>">
                     <textarea name="comment-text" placeholder="Add a comment…" maxlength="300" rows="2"
-                        class="form-control" style="border:none;background:none;color:var(--post-text-color);resize:none;outline:none;width:100%;font-family:monospace"></textarea>
+                        class="form-control"
+                        style="border:none;background:none;color:var(--post-text-color);resize:none;outline:none;width:100%;font-family:monospace">
+                    </textarea>
                     <div class="comment-compose-footer">
                         <button type="submit" class="btn btn-secondary btn-sm">&ltpost comment&gt</button>
                     </div>
@@ -79,6 +112,7 @@ if ($loggedIn) {
             <?php if (empty($comments)): ?>
             <p style="text-align:center;opacity:0.6;padding:20px">No comments yet. Be the first!</p>
             <?php endif; ?>
+
             <div class="comment-thread">
                 <?php foreach ($comments as $i => $c): ?>
                 <div class="comment-thread-item">
@@ -113,7 +147,8 @@ if ($loggedIn) {
 <?php require_once __DIR__ . '/../includes/createpost.php'; ?>
 
 <!--comment popout-->
-<div id="comment-popout" style="display:none" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
+<div id="comment-popout" style="display:none" class="modal-overlay"
+     onclick="if(event.target===this)this.style.display='none'">
     <div class="p-container modal-box">
         <div class="p-header">
             <button onclick="document.getElementById('comment-popout').style.display='none'" class="btn btn-icon">✕</button>
@@ -125,7 +160,8 @@ if ($loggedIn) {
             <form id="comment-form" action="../private/create-comment.php" method="post">
                 <input type="hidden" name="post_id" id="comment-post-id">
                 <div class="form-group">
-                    <textarea maxlength="300" name="comment-text" class="form-control" placeholder="Write a comment…" rows="2" style="resize:none"></textarea>
+                    <textarea maxlength="300" name="comment-text" class="form-control"
+                              placeholder="Write a comment…" rows="2" style="resize:none"></textarea>
                 </div>
                 <div style="display:flex;justify-content:flex-end;margin-top:6px">
                     <input type="submit" class="btn btn-secondary btn-sm" value="Post comment">
@@ -136,19 +172,19 @@ if ($loggedIn) {
 </div>
 
 <!--send post popout-->
-<?php 
-$profile = null;
+<?php
+// following list
+$profile   = null;
 $following = [];
 if ($loggedIn) {
     $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
-        FROM followingrelationships fr
-        JOIN users u ON fr.FollowedUserId = u.id
-        JOIN userprofiles up ON u.id = up.UserId
-        WHERE fr.UserId = ? LIMIT 30");
+    $stmt = $dbconn->prepare( "SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
+         FROM followingrelationships fr JOIN users u  ON fr.FollowedUserId = u.id
+         JOIN userprofiles up ON u.id = up.UserId
+         WHERE fr.UserId = ? LIMIT 30" );
     $stmt->execute([$_SESSION['user_id']]);
     $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -182,7 +218,6 @@ if ($loggedIn) {
     </div>
 </div>
 <?php endif; ?>
-
 
 <!--lightbox-->
 <div id="lightbox" style="display:none" class="modal-overlay" onclick="if(event.target===this)closeLightbox()">
