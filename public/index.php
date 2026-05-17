@@ -9,54 +9,54 @@ $loggedIn = isset($_SESSION['user_id']);
 
 switch ($feed) {
     case 'new':
-        $sql = "SELECT posts.*, users.Username,
+        $sql  = "SELECT posts.*, users.Username,
             userprofiles.Nickname, userprofiles.ProfilePicture,
-            COALESCE(SUM(postscore.Value=1),0) as Likes,
-            COALESCE(SUM(postscore.Value=-1),0) as Dislikes
+            COALESCE(SUM(postscore.Value=1),0)  AS Likes,
+            COALESCE(SUM(postscore.Value=-1),0) AS Dislikes
             FROM posts
-            JOIN users ON posts.UserId = users.id
+            JOIN users        ON posts.UserId = users.id
             JOIN userprofiles ON posts.UserId = userprofiles.UserId
             LEFT JOIN postscore ON posts.id = postscore.PostId
-            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture  
+            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
             ORDER BY posts.CreatedAt DESC LIMIT 50";
         $stmt = $dbconn->prepare($sql); $stmt->execute();
         break;
     case 'top':
-        $sql = "SELECT posts.*, users.Username,
+        $sql  = "SELECT posts.*, users.Username,
             userprofiles.Nickname, userprofiles.ProfilePicture,
-            COALESCE(SUM(postscore.Value=1),0) as Likes,
-            COALESCE(SUM(postscore.Value=-1),0) as Dislikes,
-            COALESCE(SUM(postscore.Value),0) as Score
+            COALESCE(SUM(postscore.Value=1),0)  AS Likes,
+            COALESCE(SUM(postscore.Value=-1),0) AS Dislikes,
+            COALESCE(SUM(postscore.Value),0)    AS Score
             FROM posts
-            JOIN users ON posts.UserId = users.id
+            JOIN users        ON posts.UserId = users.id
             JOIN userprofiles ON posts.UserId = userprofiles.UserId
             LEFT JOIN postscore ON posts.id = postscore.PostId
-            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture 
+            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
             ORDER BY (Score / (TIMESTAMPDIFF(HOUR, posts.CreatedAt, NOW()) + 2)) DESC LIMIT 50";
         $stmt = $dbconn->prepare($sql); $stmt->execute();
         break;
     case 'following':
         if (!$loggedIn) { header("Location: login.php"); exit; }
-        $sql = "SELECT posts.*, users.Username,
+        $sql  = "SELECT posts.*, users.Username,
             userprofiles.Nickname, userprofiles.ProfilePicture,
-            COALESCE(SUM(postscore.Value=1),0) as Likes,
-            COALESCE(SUM(postscore.Value=-1),0) as Dislikes
+            COALESCE(SUM(postscore.Value=1),0)  AS Likes,
+            COALESCE(SUM(postscore.Value=-1),0) AS Dislikes
             FROM posts
-            JOIN users ON posts.UserId = users.id
+            JOIN users        ON posts.UserId = users.id
             JOIN userprofiles ON posts.UserId = userprofiles.UserId
             LEFT JOIN postscore ON posts.id = postscore.PostId
             WHERE posts.UserId IN (SELECT FollowedUserId FROM followingrelationships WHERE UserId = ?)
-            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture 
+            GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
             ORDER BY posts.CreatedAt DESC LIMIT 50";
         $stmt = $dbconn->prepare($sql); $stmt->execute([$_SESSION['user_id']]);
         break;
     default: // discover
-        $sql = "SELECT posts.*, users.Username,
+        $sql  = "SELECT posts.*, users.Username,
             userprofiles.Nickname, userprofiles.ProfilePicture,
-            COALESCE(SUM(postscore.Value=1),0) as Likes,
-            COALESCE(SUM(postscore.Value=-1),0) as Dislikes
+            COALESCE(SUM(postscore.Value=1),0)  AS Likes,
+            COALESCE(SUM(postscore.Value=-1),0) AS Dislikes
             FROM posts
-            JOIN users ON posts.UserId = users.id
+            JOIN users        ON posts.UserId = users.id
             JOIN userprofiles ON posts.UserId = userprofiles.UserId
             LEFT JOIN postscore ON posts.id = postscore.PostId
             GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
@@ -66,7 +66,7 @@ switch ($feed) {
 }
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$profile = null;
+$profile   = null;
 $following = [];
 if ($loggedIn) {
     $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
@@ -75,25 +75,39 @@ if ($loggedIn) {
 
     $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
         FROM followingrelationships fr
-        JOIN users u ON fr.FollowedUserId = u.id
+        JOIN users u        ON fr.FollowedUserId = u.id
         JOIN userprofiles up ON u.id = up.UserId
         WHERE fr.UserId = ? LIMIT 30");
     $stmt->execute([$_SESSION['user_id']]);
     $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-//top comment
-$postIds = array_column($posts, 'id');
-$topComments = [];
-$commentCounts = [];
-if (!empty($postIds)) {
+//stared
+$starredIds = [];
+if ($loggedIn && !empty($posts)) {
+    $postIds      = array_column($posts, 'id');
     $placeholders = implode(',', array_fill(0, count($postIds), '?'));
-    $stmt = $dbconn->prepare("SELECT c.PostId, COUNT(*) as cnt FROM comments c WHERE c.PostId IN ($placeholders) GROUP BY c.PostId");
+    $stmt         = $dbconn->prepare("SELECT PostId FROM starmarks WHERE UserId = ? AND PostId IN ($placeholders)");
+    $stmt->execute(array_merge([$_SESSION['user_id']], $postIds));
+    $starredIds   = $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+//top comment
+$topComments    = [];
+$commentCounts  = [];
+if (!empty($posts)) 
+    {
+    $postIds      = array_column($posts, 'id');
+    $placeholders = implode(',', array_fill(0, count($postIds), '?'));
+
+    $stmt = $dbconn->prepare("SELECT c.PostId, COUNT(*) AS cnt FROM comments c WHERE c.PostId IN ($placeholders) GROUP BY c.PostId");
     $stmt->execute($postIds);
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) $commentCounts[$row['PostId']] = $row['cnt'];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $commentCounts[$row['PostId']] = $row['cnt'];
+    }
 
     $stmt = $dbconn->prepare("SELECT c.*, up.Nickname, up.ProfilePicture,
-        ROW_NUMBER() OVER (PARTITION BY c.PostId ORDER BY c.CreatedAt ASC) as rn
+        ROW_NUMBER() OVER (PARTITION BY c.PostId ORDER BY c.CreatedAt ASC) AS rn
         FROM comments c JOIN userprofiles up ON c.UserId = up.UserId
         WHERE c.PostId IN ($placeholders)");
     $stmt->execute($postIds);
@@ -170,14 +184,13 @@ if (!empty($postIds)) {
         <?php endif; ?>
         <div class="post-feed">
             <?php foreach ($posts as $post):
-                $pid = $post['id'];
-                $topC = $topComments[$pid] ?? null;
-                $cCount = $commentCounts[$pid] ?? 0;
-                //post media
-                $mstmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
+                $pid    = $post['id'];
+                $topC   = $topComments[$pid]   ?? null;
+                $cCount = $commentCounts[$pid]  ?? 0;
+                $mstmt  = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
                 $mstmt->execute([$pid]);
                 $mediaFiles = $mstmt->fetchAll(PDO::FETCH_COLUMN);
-                renderPostCard($post, $mediaFiles, $topC, $cCount, $loggedIn);
+                renderPostCard($post, $mediaFiles, $topC, $cCount, $loggedIn, $starredIds);
             endforeach; ?>
         </div>
     </div>

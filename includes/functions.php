@@ -1,75 +1,91 @@
 <?php
-function renderPostCard(array $post, array $mediaFiles = [], ?array $topComment = null, int $commentCount = 0, bool $loggedIn = false): void {
-    $pid      = (int)$post['id'];
-    $likes    = (int)($post['Likes'] ?? 0);
+function renderPostCard(array $post, array $mediaFiles = [], ?array $topComment = null, int $commentCount = 0, bool $loggedIn = false, array $starredIds = []): void {
+    $pid = (int)$post['id'];
+    $text = htmlspecialchars($post['Text'] ?? '');
+    $nick = htmlspecialchars($post['Nickname'] ?? $post['Username'] ?? '');
+    $user = htmlspecialchars($post['Username'] ?? '');
+    $pfp = htmlspecialchars($post['ProfilePicture'] ?? 'default.png');
+    $likes = (int)($post['Likes']    ?? 0);
     $dislikes = (int)($post['Dislikes'] ?? 0);
-    $views    = number_format($post['ViewCount'] ?? 0);
-    $date     = date('M j, Y · g:i a', strtotime($post['CreatedAt']));
-    $mediaCount = count($mediaFiles);
-?>
-<div class="post-card" data-post-id="<?= $pid ?>">
-    <a href="post.php?id=<?= (int)$post['id'] ?>" class="post-header">
+    $views = (int)($post['ViewCount'] ?? 0);
+    $uid = (int)($post['UserId'] ?? 0);
+    $isStarred = in_array($pid, $starredIds, true);
 
-        <img href="profile.php?id=<?= (int)$post['UserId'] ?>"
-            src="../uploads/pfp/<?= htmlspecialchars($post['ProfilePicture'] ?? 'default.png') ?>"
-            class="post-profile-pic" alt="">
-        <div>
-            <div class="post-username"><?= htmlspecialchars($post['Nickname'] ?? '') ?></div>
-            <div class="post-handle">@<?= htmlspecialchars($post['Username'] ?? '') ?></div>
-        </div>
-        <span class="post-views" style="margin-left:auto"><i class="fa-solid fa-eye"></i> <?= $views ?></span>
-    </a>
+    $ts = '';
+    if (!empty($post['CreatedAt'])) 
+    {
+        $ts = date('M j, g:i a', strtotime($post['CreatedAt']));
+    }
 
-    <?php if ($post['Text'] !== ''): ?>
-    <div class="post-body">
-        <p><?= htmlspecialchars($post['Text']) ?></p>
-    </div>
-    <?php endif; ?>
+    echo '<div class="post-card" data-post-id="' . $pid . '">';
+    echo '<div class="post-card-header-wrap">';
+    echo '<a href="profile.php?id='. $uid .'" class="post-header-profile no-underline" onclick="event.stopPropagation()">';
+    echo '<img src="../uploads/pfp/'. $pfp .'" class="post-profile-pic" alt="">';
+    echo '<div>';
+    echo '<span class="post-username">' . $nick . '</span>';
+    echo '<span class="post-handle">@' . $user .'</span>';
+    echo '</div>';
+    echo '</a>';
+    echo '<a href="post.php?id=' . $pid. '" class="post-header-link" aria-label="View post"></a>';
+    echo '</div>';
+    if ($text !== '') {
+        echo '<div class="post-body"><p>' . nl2br($text) . '</p></div>';
+    }
+    echo '<div class="post-meta">' . $ts . '<span class="post-views">' . number_format($views) . ' views</span></div>';
+    if (!empty($mediaFiles)) 
+    {
+        $cnt = min(count($mediaFiles), 4);
+        $imagesJson = htmlspecialchars(json_encode($mediaFiles), ENT_QUOTES);
+        echo '<div class="post-img-grid count-' . $cnt . '">';
+        foreach (array_slice($mediaFiles, 0, 4) as $i => $fn) {
+            $fnSafe = htmlspecialchars($fn);
+            echo '<img src="../uploads/media/' . $fnSafe . '" alt="media"'
+               . ' class="post-media-img lightbox-trigger"'
+               . ' data-images=\'' . $imagesJson . '\''
+               . ' data-index="' . $i . '"'
+               . ' loading="lazy">';
+        }
+        echo '</div>';
+    }
+    if ($topComment) {
+        $cNick = htmlspecialchars($topComment['Nickname'] ?? '');
+        $cPfp  = htmlspecialchars($topComment['ProfilePicture'] ?? 'default.png');
+        $cText = htmlspecialchars(mb_strimwidth($topComment['Text'] ?? '', 0, 80, '…'));
+        echo '<div class="post-preview-comment">';
+        echo '<img src="../uploads/pfp/' . $cPfp . '" alt="">';
+        echo '<p><strong>' . $cNick . ':</strong> ' . $cText . '</p>';
+        echo '</div>';
+    }
+    if ($commentCount > 0) {
+        echo '<div class="post-comment-count-bar">' . $commentCount . ' comment' . ($commentCount !== 1 ? 's' : '') . '</div>';
+    }
 
-    <?php if ($mediaCount > 0): ?>
-    <div class="post-img-grid count-<?= min($mediaCount, 4) ?>">
-        <?php foreach (array_slice($mediaFiles, 0, 4) as $i => $file): ?>
-        <img src="../uploads/media/<?= htmlspecialchars($file) ?>" class="lightbox-trigger" data-index="<?= $i ?>"
-            data-images='<?= htmlspecialchars(json_encode($mediaFiles)) ?>' alt="post image">
-        <?php endforeach; ?>
-    </div>
-    <?php endif; ?>
+    if ($loggedIn) {
+        $starClass = $isStarred ? ' active' : '';
+        $starIcon  = $isStarred ? 'fa-solid fa-star' : 'fa-regular fa-star';
+        echo '<div class="post-actions">';
+        echo '<div class="action-group">';
+        echo '<button class="action-btn like-btn"><i class="fa-solid fa-thumbs-up"></i> ' . $likes . '</button>';
+        echo '<button class="action-btn dislike-btn"><i class="fa-solid fa-thumbs-down"></i> ' . $dislikes . '</button>';
+        echo '<button class="action-btn comment-btn"><i class="fa-regular fa-comment"></i></button>';
+        echo '</div>';
+        echo '<div class="action-group">';
+        echo '<button class="action-btn share-btn"><i class="fa-solid fa-share-nodes"></i></button>';
+        echo '<button class="action-btn starmark-btn' . $starClass . '"><i class="' . $starIcon . '"></i></button>';
+        echo '</div>';
+        echo '</div>';
+    } 
+    else {
+        echo '<div class="post-actions">';
+        echo '<div class="action-group">';
+        echo '<span class="action-btn"><i class="fa-solid fa-thumbs-up"></i> ' . $likes . '</span>';
+        echo '<span class="action-btn"><i class="fa-solid fa-thumbs-down"></i> ' . $dislikes . '</span>';
+        echo '</div>';
+        echo '</div>';
+    }
+    echo '</div>';
+}
 
-    <div class="post-meta"><?= $date ?></div>
-
-    <?php if ($topComment): ?>
-    <div class="post-preview-comment comment-btn">
-        <img src="../uploads/pfp/<?= htmlspecialchars($topComment['ProfilePicture']) ?>" alt="">
-        <p><strong><?= htmlspecialchars($topComment['Nickname']) ?></strong>
-            <?= htmlspecialchars(mb_strimwidth($topComment['Text'], 0, 90, '…')) ?></p>
-    </div>
-    <?php endif; ?>
-    <?php if ($commentCount > 1): ?>
-    <div class="post-comment-count-bar comment-btn">View all <?= $commentCount ?> comments</div>
-    <?php endif; ?>
-
-    <div class="post-actions">
-        <div class="action-group">
-            <?php if ($loggedIn): ?>
-            <button class="action-btn like-btn"><i class="fa-solid fa-thumbs-up"></i> <?= $likes ?></button>
-            <button class="action-btn dislike-btn"><i class="fa-solid fa-thumbs-down"></i> <?= $dislikes ?></button>
-            <button class="action-btn comment-btn"><i class="fa-solid fa-comment"></i> Comment</button>
-            <?php else: ?>
-            <a href="login.php" class="action-btn"><i class="fa-solid fa-thumbs-up"></i> <?= $likes ?></a>
-            <a href="login.php" class="action-btn"><i class="fa-solid fa-thumbs-down"></i> <?= $dislikes ?></a>
-            <a href="login.php" class="action-btn"><i class="fa-solid fa-comment"></i> Comment</a>
-            <?php endif; ?>
-        </div>
-        <div class="action-group">
-            <?php if ($loggedIn): ?>
-            <button class="action-btn starmark-btn"><i class="fa-solid fa-star"></i></button>
-            <button class="action-btn share-btn"><i class="fa-solid fa-paper-plane"></i></button>
-            <?php else: ?>
-            <a href="login.php" class="action-btn"><i class="fa-solid fa-star"></i></a>
-            <button class="action-btn share-btn"><i class="fa-solid fa-paper-plane"></i></button>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-<?php
+function isAdmin(): bool {
+    return !empty($_SESSION['is_admin']);
 }
