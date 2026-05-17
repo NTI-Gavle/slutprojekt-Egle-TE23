@@ -1335,17 +1335,19 @@ h1,h2,h3,h4,p
         margin: 0;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content:space-evenly;
         font-size: large;
         padding: 10px 0;
         z-index: 90;
         border-top: 2px solid var(--border-color);
+        overflow: scroll;
     }
     .time { margin: 5px; font-size: 1.4em; }
-    .site-links { flex-direction: row; gap: 20px; }
+    .site-links { flex-direction: row; gap: 0px; }
     .site-links > a, .site-links > button { font-size: x-large; }
+    .site-nav > a { display: none !important; }
     .site-nav-bar-hr { display: none !important; }
-    .site-nav-bar-vr { display: block !important; }
+    .site-nav-bar-vr { display: none !important; }
  
     body { padding-bottom: 70px; }
  
