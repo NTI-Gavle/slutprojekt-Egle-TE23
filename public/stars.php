@@ -9,11 +9,11 @@ $userId = $_SESSION["user_id"];
 
 $stmt = $dbconn->prepare("SELECT posts.*, users.Username,
     userprofiles.Nickname, userprofiles.ProfilePicture,
-    COALESCE(SUM(ps.Value=1),0) as Likes,
-    COALESCE(SUM(ps.Value=-1),0) as Dislikes
+    COALESCE(SUM(ps.Value=1),0)  AS Likes,
+    COALESCE(SUM(ps.Value=-1),0) AS Dislikes
     FROM starmarks
-    JOIN posts ON starmarks.PostId = posts.id
-    JOIN users ON posts.UserId = users.id
+    JOIN posts        ON starmarks.PostId = posts.id
+    JOIN users        ON posts.UserId = users.id
     JOIN userprofiles ON posts.UserId = userprofiles.UserId
     LEFT JOIN postscore ps ON posts.id = ps.PostId
     WHERE starmarks.UserId = ?
@@ -21,6 +21,8 @@ $stmt = $dbconn->prepare("SELECT posts.*, users.Username,
     ORDER BY starmarks.id DESC");
 $stmt->execute([$userId]);
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$starredIds = array_column($posts, 'id');
 ?>
 <script src="js/feed.js" defer></script>
 <div class="feed-container">
@@ -35,19 +37,16 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $mstmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
                 $mstmt->execute([$post['id']]);
                 $mf = $mstmt->fetchAll(PDO::FETCH_COLUMN);
-                renderPostCard($post, $mf, null, 0, true);
+                renderPostCard($post, $mf, null, 0, true, $starredIds);
             endforeach; ?>
         </div>
     </div>
     <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 </div>
 
-
-
 <?php if (isset($_SESSION["user_id"])): ?>
 <?php require_once __DIR__ . '/../includes/createpost.php'; ?>
 
-<!--comment popout-->
 <div id="comment-popout" style="display:none" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
     <div class="p-container modal-box">
         <div class="p-header">
@@ -70,23 +69,15 @@ $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
-<!--send post popout-->
-<?php 
-$profile = null;
+<?php
 $following = [];
-if(isset($_SESSION["user_id"])) {
-    $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
-        FROM followingrelationships fr
-        JOIN users u ON fr.FollowedUserId = u.id
-        JOIN userprofiles up ON u.id = up.UserId
-        WHERE fr.UserId = ? LIMIT 30");
-    $stmt->execute([$_SESSION['user_id']]);
-    $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+$stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
+    FROM followingrelationships fr
+    JOIN users u        ON fr.FollowedUserId = u.id
+    JOIN userprofiles up ON u.id = up.UserId
+    WHERE fr.UserId = ? LIMIT 30");
+$stmt->execute([$userId]);
+$following = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <div id="send-popout" style="display:none" class="modal-overlay">
     <div class="p-container modal-box">
@@ -117,6 +108,5 @@ if(isset($_SESSION["user_id"])) {
     </div>
 </div>
 <?php endif; ?>
-
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

@@ -43,7 +43,6 @@ if (animBgToggle) {
     });
 }
 
-//
 function previewImage(input, previewId) {
     if (!input.files || !input.files[0]) return;
     const reader = new FileReader();

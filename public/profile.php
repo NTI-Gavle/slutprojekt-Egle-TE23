@@ -6,14 +6,14 @@ require_once('../includes/functions.php');
 
 if (!isset($_SESSION["user_id"])) { header("Location: login.php"); exit; }
 
-$myId   = $_SESSION["user_id"];
+$myId = (int)$_SESSION["user_id"];
 $viewId = isset($_GET['id']) ? (int)$_GET['id'] : $myId;
 $isOwnProfile = ($viewId === $myId);
 $loggedIn = true;
 
 $stmt = $dbconn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$viewId]);
-$res = $stmt->fetch(PDO::FETCH_ASSOC);
+$res  = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$res) { header("Location: index.php"); exit; }
 
 $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
@@ -46,10 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isOwnProfile) {
 
 $tab = $_GET['tab'] ?? 'posts';
 $posts = $mediaPosts = $starredPosts = $userComments = [];
+$starredIds = [];
 
 if ($tab === 'posts') {
     $stmt = $dbconn->prepare("SELECT posts.*, users.Username,
-        COALESCE(SUM(ps.Value=1),0) as Likes, COALESCE(SUM(ps.Value=-1),0) as Dislikes
+        COALESCE(SUM(ps.Value=1),0)  AS Likes,
+        COALESCE(SUM(ps.Value=-1),0) AS Dislikes
         FROM posts JOIN users ON posts.UserId = users.id
         LEFT JOIN postscore ps ON posts.id = ps.PostId
         WHERE posts.UserId = ?
@@ -57,12 +59,20 @@ if ($tab === 'posts') {
     $stmt->execute([$viewId]);
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
     foreach ($posts as &$p) {
-        $p['Nickname'] = $profile['Nickname'];
+        $p['Nickname']       = $profile['Nickname'];
         $p['ProfilePicture'] = $profile['ProfilePicture'];
     } unset($p);
+
+    if (!empty($posts)) {
+        $pids    = array_column($posts, 'id');
+        $ph      = implode(',', array_fill(0, count($pids), '?'));
+        $stmt2   = $dbconn->prepare("SELECT PostId FROM starmarks WHERE UserId = ? AND PostId IN ($ph)");
+        $stmt2->execute(array_merge([$myId], $pids));
+        $starredIds = $stmt2->fetchAll(PDO::FETCH_COLUMN);
+    }
 }
 if ($tab === 'media') {
-    $stmt = $dbconn->prepare("SELECT posts.*, GROUP_CONCAT(media.FileName ORDER BY media.id) as MediaFiles
+    $stmt = $dbconn->prepare("SELECT posts.*, GROUP_CONCAT(media.FileName ORDER BY media.id) AS MediaFiles
         FROM posts JOIN media ON media.PostId = posts.id WHERE posts.UserId = ?
         GROUP BY posts.id ORDER BY posts.CreatedAt DESC LIMIT 50");
     $stmt->execute([$viewId]);
@@ -71,9 +81,10 @@ if ($tab === 'media') {
 if ($tab === 'stars') {
     $stmt = $dbconn->prepare("SELECT posts.*, users.Username,
         userprofiles.Nickname, userprofiles.ProfilePicture,
-        COALESCE(SUM(ps.Value=1),0) as Likes, COALESCE(SUM(ps.Value=-1),0) as Dislikes
+        COALESCE(SUM(ps.Value=1),0)  AS Likes,
+        COALESCE(SUM(ps.Value=-1),0) AS Dislikes
         FROM starmarks JOIN posts ON starmarks.PostId = posts.id
-        JOIN users ON posts.UserId = users.id
+        JOIN users        ON posts.UserId = users.id
         JOIN userprofiles ON posts.UserId = userprofiles.UserId
         LEFT JOIN postscore ps ON posts.id = ps.PostId
         WHERE starmarks.UserId = ?
@@ -81,14 +92,15 @@ if ($tab === 'stars') {
         ORDER BY starmarks.id DESC LIMIT 50");
     $stmt->execute([$viewId]);
     $starredPosts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $starredIds   = array_column($starredPosts, 'id');
 }
 if ($tab === 'comments') {
     $stmt = $dbconn->prepare("SELECT comments.*, users.Username,
-        posts.Text as PostText, posts.id as PostId,
-        up2.Nickname as PostAuthorNick, up2.ProfilePicture as PostAuthorPic
+        posts.Text AS PostText, posts.id AS PostId,
+        up2.Nickname AS PostAuthorNick, up2.ProfilePicture AS PostAuthorPic
         FROM comments
-        JOIN users ON comments.UserId = users.id
-        JOIN posts ON comments.PostId = posts.id
+        JOIN users        ON comments.UserId = users.id
+        JOIN posts        ON comments.PostId = posts.id
         JOIN userprofiles up2 ON posts.UserId = up2.UserId
         WHERE comments.UserId = ?
         ORDER BY comments.CreatedAt DESC LIMIT 50");
@@ -96,13 +108,18 @@ if ($tab === 'comments') {
     $userComments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture FROM followingrelationships fr JOIN users u ON fr.FollowedUserId = u.id JOIN userprofiles up ON u.id = up.UserId WHERE fr.UserId = ?");
+$stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
+    FROM followingrelationships fr JOIN users u ON fr.FollowedUserId = u.id
+    JOIN userprofiles up ON u.id = up.UserId WHERE fr.UserId = ?");
 $stmt->execute([$viewId]); $followingList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture FROM followingrelationships fr JOIN users u ON fr.UserId = u.id JOIN userprofiles up ON u.id = up.UserId WHERE fr.FollowedUserId = ?");
+$stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
+    FROM followingrelationships fr JOIN users u ON fr.UserId = u.id
+    JOIN userprofiles up ON u.id = up.UserId WHERE fr.FollowedUserId = ?");
 $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <script src="js/feed.js" defer></script>
+<script src="js/lightbox.js" defer></script>
 
 <div class="feed-container">
     <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
@@ -119,6 +136,9 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div>
                             <h2 style="margin:0"><?= htmlspecialchars($profile['Nickname'] ?? '') ?></h2>
                             <span style="opacity:0.6">@<?= htmlspecialchars($res['Username']) ?></span>
+                            <?php if (!empty($res['IsBanned'])): ?>
+                            <span style="color:var(--danger);font-size:0.8em"> [banned]</span>
+                            <?php endif; ?>
                         </div>
                         <?php if ($isOwnProfile): ?>
                         <a class="btn btn-secondary btn-sm" href="settings.php">&ltedit profile&gt</a>
@@ -144,9 +164,9 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
             <div class="profile-tabs">
-                <a href="?id=<?= $viewId ?>&tab=posts" class="profile-tab <?= $tab==='posts'?'active':'' ?>">&ltposts&gt</a>
-                <a href="?id=<?= $viewId ?>&tab=media" class="profile-tab <?= $tab==='media'?'active':'' ?>">&ltmedia&gt</a>
-                <a href="?id=<?= $viewId ?>&tab=stars" class="profile-tab <?= $tab==='stars'?'active':'' ?>">&ltstars&gt</a>
+                <a href="?id=<?= $viewId ?>&tab=posts"    class="profile-tab <?= $tab==='posts'   ?'active':'' ?>">&ltposts&gt</a>
+                <a href="?id=<?= $viewId ?>&tab=media"    class="profile-tab <?= $tab==='media'   ?'active':'' ?>">&ltmedia&gt</a>
+                <a href="?id=<?= $viewId ?>&tab=stars"    class="profile-tab <?= $tab==='stars'   ?'active':'' ?>">&ltstars&gt</a>
                 <a href="?id=<?= $viewId ?>&tab=comments" class="profile-tab <?= $tab==='comments'?'active':'' ?>">&ltcomments&gt</a>
             </div>
         </div>
@@ -158,7 +178,7 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $mstmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
                 $mstmt->execute([$post['id']]);
                 $mf = $mstmt->fetchAll(PDO::FETCH_COLUMN);
-                renderPostCard($post, $mf, null, 0, $loggedIn);
+                renderPostCard($post, $mf, null, 0, $loggedIn, $starredIds);
             endforeach; ?>
         </div>
 
@@ -180,7 +200,7 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $mstmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
                 $mstmt->execute([$post['id']]);
                 $mf = $mstmt->fetchAll(PDO::FETCH_COLUMN);
-                renderPostCard($post, $mf, null, 0, $loggedIn);
+                renderPostCard($post, $mf, null, 0, $loggedIn, $starredIds);
             endforeach; ?>
         </div>
 
@@ -200,7 +220,7 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <small style="margin-left:auto"><?= date('M j, g:i a', strtotime($c['CreatedAt'])) ?></small>
                         </div>
                         <p class="comment-thread-text"><?= htmlspecialchars($c['Text']) ?></p>
-                        <a href="post.php?id=<?= $c['PostId'] ?>" class="no-underline" style="font-size:0.78em; opacity:0.55; display:flex; gap:6px; align-items:center;margin-top:4px">
+                        <a href="post.php?id=<?= $c['PostId'] ?>" class="no-underline" style="font-size:0.78em;opacity:0.55;display:flex;gap:6px;align-items:center;margin-top:4px">
                             <img src="../uploads/pfp/<?= htmlspecialchars($c['PostAuthorPic']) ?>" style="width:18px;height:18px;border-radius:50%;object-fit:cover">
                             Replying to <?= htmlspecialchars($c['PostAuthorNick']) ?>: <em><?= htmlspecialchars(mb_strimwidth($c['PostText'], 0, 55, '…')) ?></em>
                         </a>
@@ -220,11 +240,9 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="p-header"><span>Followers</span><button class="btn btn-icon" onclick="document.getElementById('followers-modal').style.display='none'">✕</button></div>
         <div class="p-content">
             <?php foreach ($followerList as $u): ?>
-            <a href="profile.php?id=<?= $u['id'] ?>" class="link-p">
-                <div class="search-user-row">
-                    <img src="../uploads/pfp/<?= htmlspecialchars($u['ProfilePicture']) ?>" class="post-profile-pic">
-                    <div><strong><?= htmlspecialchars($u['Nickname']) ?></strong><br><small>@<?= htmlspecialchars($u['Username']) ?></small></div>
-                </div>
+            <a href="profile.php?id=<?= $u['id'] ?>" class="search-user-card">
+                <img src="../uploads/pfp/<?= htmlspecialchars($u['ProfilePicture']) ?>" class="post-profile-pic">
+                <div><strong><?= htmlspecialchars($u['Nickname']) ?></strong><br><small>@<?= htmlspecialchars($u['Username']) ?></small></div>
             </a>
             <?php endforeach; ?>
             <?php if (empty($followerList)): ?><p style="opacity:0.6">No followers yet.</p><?php endif; ?>
@@ -238,11 +256,9 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="p-header"><span>Following</span><button class="btn btn-icon" onclick="document.getElementById('following-modal').style.display='none'">✕</button></div>
         <div class="p-content">
             <?php foreach ($followingList as $u): ?>
-            <a href="profile.php?id=<?= $u['id'] ?>" class="link-p">
-                <div class="search-user-row">
-                    <img src="../uploads/pfp/<?= htmlspecialchars($u['ProfilePicture']) ?>" class="post-profile-pic">
-                    <div><strong><?= htmlspecialchars($u['Nickname']) ?></strong><br><small>@<?= htmlspecialchars($u['Username']) ?></small></div>
-                </div>
+            <a href="profile.php?id=<?= $u['id'] ?>" class="search-user-card">
+                <img src="../uploads/pfp/<?= htmlspecialchars($u['ProfilePicture']) ?>" class="post-profile-pic">
+                <div><strong><?= htmlspecialchars($u['Nickname']) ?></strong><br><small>@<?= htmlspecialchars($u['Username']) ?></small></div>
             </a>
             <?php endforeach; ?>
             <?php if (empty($followingList)): ?><p style="opacity:0.6">Not following anyone yet.</p><?php endif; ?>
@@ -250,11 +266,9 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
-
 <?php if ($loggedIn): ?>
 <?php require_once __DIR__ . '/../includes/createpost.php'; ?>
 
-<!--comment popout-->
 <div id="comment-popout" style="display:none" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
     <div class="p-container modal-box">
         <div class="p-header">
@@ -277,23 +291,15 @@ $stmt->execute([$viewId]); $followerList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 
-<!--send post popout-->
-<?php 
-$profile = null;
-$following = [];
-if ($loggedIn) {
-    $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
-        FROM followingrelationships fr
-        JOIN users u ON fr.FollowedUserId = u.id
-        JOIN userprofiles up ON u.id = up.UserId
-        WHERE fr.UserId = ? LIMIT 30");
-    $stmt->execute([$_SESSION['user_id']]);
-    $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+<?php
+$followingForSend = [];
+$stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture
+    FROM followingrelationships fr
+    JOIN users u        ON fr.FollowedUserId = u.id
+    JOIN userprofiles up ON u.id = up.UserId
+    WHERE fr.UserId = ? LIMIT 30");
+$stmt->execute([$myId]);
+$followingForSend = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <div id="send-popout" style="display:none" class="modal-overlay">
     <div class="p-container modal-box">
@@ -307,9 +313,9 @@ if ($loggedIn) {
                 <span id="copy-confirm" style="display:none;color:green">Copied!</span>
             </div>
             <p style="text-align:center;opacity:0.7">— or send to —</p>
-            <?php if (!empty($following)): ?>
+            <?php if (!empty($followingForSend)): ?>
             <div class="follow-send-list">
-                <?php foreach ($following as $f): ?>
+                <?php foreach ($followingForSend as $f): ?>
                 <div class="follow-item">
                     <img src="../uploads/pfp/<?= htmlspecialchars($f['ProfilePicture']) ?>" class="post-profile-pic">
                     <span><?= htmlspecialchars($f['Nickname']) ?></span>
@@ -325,5 +331,14 @@ if ($loggedIn) {
 </div>
 <?php endif; ?>
 
+<!--lightbox-->
+<div id="lightbox" style="display:none" class="modal-overlay" onclick="if(event.target===this)closeLightbox()">
+    <div class="lightbox-box">
+        <button class="lightbox-btn lightbox-prev" onclick="lightboxStep(-1)">&#8249;</button>
+        <img id="lightbox-img" src="" alt="full size" style="max-width:90vw;max-height:85vh;border-radius:10px;object-fit:contain">
+        <button class="lightbox-btn lightbox-next" onclick="lightboxStep(1)">&#8250;</button>
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    </div>
+</div>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

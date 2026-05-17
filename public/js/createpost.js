@@ -1,7 +1,9 @@
 const postTa = document.getElementById('create-post-text');
 const postCounter = document.getElementById('post-char-counter');
 if (postTa && postCounter) {
-    postTa.addEventListener('input', () => { postCounter.textContent = postTa.value.length + '/500'; });
+    postTa.addEventListener('input', () => {
+        postCounter.textContent = postTa.value.length + '/500';
+    });
 }
 
 function limitFiles(input, max) {
@@ -11,16 +13,15 @@ function limitFiles(input, max) {
         document.getElementById('post-media-preview').innerHTML = '';
         return;
     }
-    //preview
     const preview = document.getElementById('post-media-preview');
     preview.innerHTML = '';
     Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'media-preview-thumb';
-            preview.appendChild(img);
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'position:relative;display:inline-block';
+            wrap.innerHTML = `<img src="${e.target.result}" class="media-preview-thumb" alt="preview">`;
+            preview.appendChild(wrap);
         };
         reader.readAsDataURL(file);
     });

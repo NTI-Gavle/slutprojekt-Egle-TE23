@@ -18,14 +18,14 @@
 html.darkmode, body.darkmode {
     --bg-gradient-top: #03002d;
     --bg-gradient-bottom: #453f96;
-    --primary-color:  #1b214c;
-    --secondary-color:#9fabff;
+    --primary-color:  #000a55;
+    --secondary-color:#000038;
     --primary-text-color: #fff;
     --secondary-text-color: #fff;
     --post-text-color: #fff;
     --text-midtone-color: #fff;
     --accent-color: #dee1ff;
-    --border-color: #fff;
+    --border-color: #8bb5ff;
 
     --white: #fff;
     --black: #000;
@@ -220,7 +220,7 @@ h1,h2,h3,h4,p
     margin-bottom: 10px;
     transition: border-color 0.15s;
 }
-.search-user-card:hover { border-color: var(--secondary-color); }
+.search-user-card:hover { border-color: var(--accent-color) }
 .search-user-card img {
     width: 48px; height: 48px;
     border-radius: 50%; object-fit: cover;
@@ -513,29 +513,29 @@ h1,h2,h3,h4,p
 /*emoji*/
 .emoji-picker-grid {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 4px;
     background: var(--primary-color);
     border: 2px solid var(--border-color);
     border-radius: 14px;
     padding: 10px;
     position: absolute;
-    bottom: 100%;
-    left: 0;
+    bottom: 50%;
+    left: 0%;
     z-index: 100;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 .emoji-option {
-    font-size: 1.4em;
+    font-size: 1em;
     cursor: pointer;
     border-radius: 8px;
+    white-space: nowrap;
     text-align: center;
     padding: 4px;
     transition: background 0.1s;
 }
 .emoji-option:hover { background: var(--secondary-color); }
  
-
 
 /*Feed*/
 .feed-container{
@@ -1301,56 +1301,111 @@ h1,h2,h3,h4,p
 .btn-pill{
     border-radius: 20px;
 }
-
-/*MEDIAQUERRTY*/
 @media screen and (max-width: 900px) {
-    .feed-container {
+    .feed-container 
+    {
         grid-template-columns: 1fr;
         max-width: 100%;
+        gap: 0;
     }
-    .feed-nav{
+    .feed { padding: 0 8px; }
+ 
+    .feed-nav 
+    {
         position: relative !important;
         top: 0 !important;
         flex-direction: row !important;
-        margin: 10px 10px !important;
+        flex-wrap: wrap;
+        margin: 8px !important;
         width: auto !important;
+        border-radius: 16px;
     }
-    .site-nav {
-        position:fixed;
-        top: auto;
+    .site-nav 
+    {
+        position: fixed;
+        top: auto; 
         bottom: 0;
+        left: 0; 
+        right: 0;
         background-color: var(--secondary-color);
         max-width: 100%;
-        display:flex;
-        margin: 0px;
         width: 100%;
+        margin: 0;
+        display: flex;
         align-items: center;
         justify-content: center;
         font-size: large;
+        padding: 10px 0;
+        z-index: 90;
+        border-top: 2px solid var(--border-color);
     }
-    .time{margin: 5px}
-    .site-links{
-        flex-direction: row;
-    }
-    .site-links > a, .site-links>button{
-       font-size:x-large; 
-    }
-    .site-nav-bar-hr{display: none !important;}
-    .site-nav-bar-vr{
-        display: block !important; 
-    }
-    /*chat*/
-    .chat-page-container {
-    grid-template-columns: 1fr;
-    height: auto;
+    .time { margin: 5px; font-size: 1.4em; }
+    .site-links { flex-direction: row; gap: 20px; }
+    .site-links > a, .site-links > button { font-size: x-large; }
+    .site-nav-bar-hr { display: none !important; }
+    .site-nav-bar-vr { display: block !important; }
+ 
+    body { padding-bottom: 70px; }
+ 
+    .chat-page-container 
+    {
+        grid-template-columns: 1fr;
+        height: auto;
+        margin: 10px 8px;
+        padding: 0;
     }
     .chat-sidebar {
-        margin: auto 10px;
-        max-height: 200px;
+        max-height: 220px;
         overflow-y: auto;
+        margin: 0;
     }
     .chat-main {
-        margin: auto 10px;
+        margin: 0;
         height: 60vh;
     }
+ 
+    .settings-container
+    {
+        grid-template-columns: 1fr;
+        padding: 8px;
+    }
+    .settings-nav
+     {
+        position: relative;
+        top: 0;
+    }
+    .settings-nav .settings-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+    }
+    /*lightbox*/
+    .lightbox-prev { left: 4px; }
+    .lightbox-next { right: 4px; }
+    /*Profile*/
+    .profile-card-body { flex-direction: column; }
+    .profile-pic-large { margin-top: -35px; width: 70px; height: 70px; }
+    /*header*/
+    .header-container { padding: 0 8px; }
+    .site-title a { font-size: 1.1em; }
+    /*admin*/
+    .admin-table th, .admin-table td { font-size: 0.8em; padding: 6px 8px; }
+}
+
+@media screen and (max-width: 480px) {
+    .feed-nav { font-size: 0.85em; padding: 10px; }
+    .post-card { border-radius: 16px; margin-bottom: 10px; }
+    .post-card-header-wrap { border-radius: 14px 14px 0 0; padding: 8px 10px; }
+    .post-body { padding: 10px 12px 6px; }
+    .post-img-grid { padding: 0 10px 8px; }
+    .post-actions { padding: 4px 6px 8px; }
+    .action-btn { padding: 5px 7px; font-size: 0.8em; }
+    .modal-box { width: 98vw; }
+    #search-wrapper { max-width: 180px; }
+    .profile-tabs { gap: 4px; }
+    .profile-tab { padding: 6px 8px; font-size: 0.8em; }
+    .media-grid { grid-template-columns: repeat(2, 1fr); }
+    .chat-messages .message-bubble { max-width: 85%; }
 }

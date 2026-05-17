@@ -90,7 +90,8 @@ if ($tab === 'posts') {
             WHERE p.Text LIKE ? ORDER BY p.id DESC LIMIT 100");
         $stmt->execute(['%' . $search . '%']);
     } 
-    else {
+    else 
+    {
         $stmt = $dbconn->query("SELECT p.*, u.Username, up.Nickname, up.ProfilePicture
             FROM posts p JOIN users u ON p.UserId = u.id JOIN userprofiles up ON p.UserId = up.UserId
             ORDER BY p.id DESC LIMIT 100");

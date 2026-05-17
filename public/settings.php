@@ -53,7 +53,7 @@ $darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
     </nav>
 
     <div class="settings-display settings-field">
-        <!--account -->
+        <!--account-->
         <div id="account" class="settings-section" style="<?= $tab === 'account' ? 'display:flex' : 'display:none' ?>">
             <h2>Account</h2>
 
@@ -139,7 +139,7 @@ $darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
             <div class="settings-toggle-row">
                 <div>
                     <strong>Dark mode</strong>
-                    <p style="opacity:0.6;font-size:0.85em;margin:0">Switch between the light sky and dark night theme.</p>
+                    <p style="opacity:0.6;font-size:0.85em;margin:0">Switch between the day and night theme!</p>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="darkmode-toggle"
@@ -149,7 +149,7 @@ $darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
             <div class="settings-toggle-row">
                 <div>
                     <strong>Animated star background</strong>
-                    <p style="opacity:0.6;font-size:0.85em;margin:0">Show the starfield and shooting star animation.</p>
+                    <p style="opacity:0.6;font-size:0.85em;margin:0">Show the background aniation.</p>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="animated-bg-toggle"

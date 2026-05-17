@@ -4,7 +4,6 @@ require_once __DIR__ . '/../includes/header.php';
 include('../private/dbconnection.php');
 require_once('../includes/functions.php');
 
-//delete
 if (isset($_GET['delete_search']) && isset($_SESSION['user_id'])) {
     $delId = (int)$_GET['delete_search'];
     $dbconn->prepare("DELETE FROM searchterms WHERE id = ? AND UserId = ?")->execute([$delId, $_SESSION['user_id']]);
@@ -15,33 +14,38 @@ $query = trim($_POST['search'] ?? $_GET['q'] ?? '');
 $results = [];
 $userResults = [];
 $loggedIn = isset($_SESSION['user_id']);
+$starredIds = [];
 
-if ($query !== '') {
-    //user search terms
+if ($query !== '') 
+    {
     if ($loggedIn) {
         $dbconn->prepare("DELETE FROM searchterms WHERE UserId = ? AND SearchTerm = ? AND Type = 'user'")->execute([$_SESSION['user_id'], $query]);
         $dbconn->prepare("INSERT INTO searchterms (UserId, SearchTerm, Type) VALUES (?, ?, 'user')")->execute([$_SESSION['user_id'], $query]);
     }
-    //post searchs
     $stmt = $dbconn->prepare("SELECT posts.*, users.Username,
         userprofiles.Nickname, userprofiles.ProfilePicture,
-        COALESCE(SUM(postscore.Value=1),0) as Likes,
-        COALESCE(SUM(postscore.Value=-1),0) as Dislikes
-        FROM posts
-        JOIN users ON posts.UserId = users.id
+        COALESCE(SUM(postscore.Value=1),0)  AS Likes,
+        COALESCE(SUM(postscore.Value=-1),0) AS Dislikes
+        FROM posts JOIN users ON posts.UserId = users.id
         JOIN userprofiles ON posts.UserId = userprofiles.UserId
         LEFT JOIN postscore ON posts.id = postscore.PostId
         WHERE posts.Text LIKE ?
-        GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture 
+        GROUP BY posts.id, userprofiles.Nickname, userprofiles.ProfilePicture
         ORDER BY posts.CreatedAt DESC LIMIT 30");
-    $stmt->execute(['%'.$query.'%']);
+    $stmt->execute(['%' . $query . '%']);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    //user search
+    
+    if ($loggedIn && !empty($results)) {
+        $pids = array_column($results, 'id');
+        $ph   = implode(',', array_fill(0, count($pids), '?'));
+        $s2   = $dbconn->prepare("SELECT PostId FROM starmarks WHERE UserId = ? AND PostId IN ($ph)");
+        $s2->execute(array_merge([$_SESSION['user_id']], $pids));
+        $starredIds = $s2->fetchAll(PDO::FETCH_COLUMN);
+    }
     $stmt = $dbconn->prepare("SELECT u.id, u.Username, up.Nickname, up.ProfilePicture, up.Description
         FROM users u JOIN userprofiles up ON u.id = up.UserId
         WHERE u.Username LIKE ? OR up.Nickname LIKE ? LIMIT 6");
-    $stmt->execute(['%'.$query.'%', '%'.$query.'%']);
+    $stmt->execute(['%' . $query . '%', '%' . $query . '%']);
     $userResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -51,10 +55,13 @@ if ($loggedIn) {
     $stmt->execute([$_SESSION['user_id']]);
     $recentSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-$stmt = $dbconn->prepare("SELECT SearchTerm, COUNT(*) as cnt FROM searchterms WHERE Type = 'user' GROUP BY SearchTerm ORDER BY cnt DESC LIMIT 8");
+$stmt = $dbconn->prepare("SELECT SearchTerm, COUNT(*) AS cnt FROM searchterms WHERE Type = 'user' GROUP BY SearchTerm ORDER BY cnt DESC LIMIT 8");
 $stmt->execute();
 $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
+<script src="js/feed.js" defer></script>
+<script src="js/lightbox.js" defer></script>
 
 <div class="feed-container">
     <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
@@ -62,12 +69,12 @@ $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="feed">
         <h1>&ltsearch&gt</h1>
 
-        <!-- Search bar -->
         <form action="search.php" method="GET">
             <div style="width:100%;margin-bottom:20px">
                 <div id="search-bar" style="max-width:100%">
                     <i class="fa-solid fa-magnifying-glass" style="opacity:0.7"></i>
-                    <input type="text" name="q" id="search-field-page" value="<?= htmlspecialchars($query) ?>"
+                    <input type="text" name="q" id="search-field-page"
+                        value="<?= htmlspecialchars($query) ?>"
                         placeholder="search…" autocomplete="off" style="flex:1">
                     <?php if ($query !== ''): ?>
                     <a href="search.php" style="color:var(--secondary-text-color);opacity:0.7;text-decoration:none">✕</a>
@@ -79,15 +86,16 @@ $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php if ($query === ''): ?>
         <div class="p-container" style="overflow:hidden">
             <div id="search-dropdown-inner" style="display:block">
-                <?php if (!empty($recentSearches)): ?>
+            
+            <?php if (!empty($recentSearches)): ?>
                 <div class="search-dd-section">Recent</div>
                 <?php foreach ($recentSearches as $rs): ?>
-                <div class="search-dd-row" style="position:relative">
+                <div class="search-dd-row">
                     <i class="fa-solid fa-clock-rotate-left search-dd-icon"></i>
                     <a class="no-underline" href="search.php?q=<?= urlencode($rs['SearchTerm']) ?>" style="flex:1;color:var(--post-text-color)">
                         <?= htmlspecialchars($rs['SearchTerm']) ?>
                     </a>
-                    <a href="search.php?delete_search=<?= $rs['id'] ?>" class="search-dd-del" title="remove">✕</a>
+                    <a href="search.php?delete_search=<?= $rs['id'] ?>" class="search-dd-del no-underline" title="remove">✕</a>
                 </div>
                 <?php endforeach; ?>
                 <?php endif; ?>
@@ -142,7 +150,7 @@ $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $mstmt = $dbconn->prepare("SELECT FileName FROM media WHERE PostId = ? ORDER BY id");
                 $mstmt->execute([$post['id']]);
                 $mf = $mstmt->fetchAll(PDO::FETCH_COLUMN);
-                renderPostCard($post, $mf, null, 0, $loggedIn);
+                renderPostCard($post, $mf, null, 0, $loggedIn, $starredIds);
             endforeach; ?>
         </div>
         <?php endif; ?>
@@ -152,8 +160,9 @@ $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 </div>
 
-<!--comment -->
 <?php if ($loggedIn): ?>
+<?php require_once __DIR__ . '/../includes/createpost.php'; ?>
+
 <div id="comment-popout" style="display:none" class="modal-overlay" onclick="if(event.target===this)this.style.display='none'">
     <div class="p-container modal-box">
         <div class="p-header">
@@ -173,6 +182,7 @@ $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </div>
+
 <div id="send-popout" style="display:none" class="modal-overlay">
     <div class="p-container modal-box">
         <div class="p-header">
@@ -188,6 +198,14 @@ $popularSearches = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 <?php endif; ?>
+<!--lightbox-->
+<div id="lightbox" style="display:none" class="modal-overlay" onclick="if(event.target===this)closeLightbox()">
+    <div class="lightbox-box">
+        <button class="lightbox-btn lightbox-prev" onclick="lightboxStep(-1)">&#8249;</button>
+        <img id="lightbox-img" src="" alt="full size" style="max-width:90vw;max-height:85vh;border-radius:10px;object-fit:contain">
+        <button class="lightbox-btn lightbox-next" onclick="lightboxStep(1)">&#8250;</button>
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    </div>
+</div>
 
-<script src="js/feed.js" defer></script>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

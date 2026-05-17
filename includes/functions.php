@@ -31,7 +31,7 @@ function renderPostCard(array $post, array $mediaFiles = [], ?array $topComment 
     if ($text !== '') {
         echo '<div class="post-body"><p>' . nl2br($text) . '</p></div>';
     }
-    echo '<div class="post-meta">' . $ts . '<span class="post-views">' . number_format($views) . ' views</span></div>';
+    
     if (!empty($mediaFiles)) 
     {
         $cnt = min(count($mediaFiles), 4);
@@ -47,6 +47,7 @@ function renderPostCard(array $post, array $mediaFiles = [], ?array $topComment 
         }
         echo '</div>';
     }
+    echo '<div class="post-meta">' . $ts . '<span class="post-views"><i class="fa-solid fa-eye"></i> ' . number_format($views) . '</span></div>';
     if ($topComment) {
         $cNick = htmlspecialchars($topComment['Nickname'] ?? '');
         $cPfp  = htmlspecialchars($topComment['ProfilePicture'] ?? 'default.png');
@@ -70,7 +71,7 @@ function renderPostCard(array $post, array $mediaFiles = [], ?array $topComment 
         echo '<button class="action-btn comment-btn"><i class="fa-regular fa-comment"></i></button>';
         echo '</div>';
         echo '<div class="action-group">';
-        echo '<button class="action-btn share-btn"><i class="fa-solid fa-share-nodes"></i></button>';
+        echo '<button class="action-btn share-btn"><i class="fa-solid fa-paper-plane"></i></button>';
         echo '<button class="action-btn starmark-btn' . $starClass . '"><i class="' . $starIcon . '"></i></button>';
         echo '</div>';
         echo '</div>';
