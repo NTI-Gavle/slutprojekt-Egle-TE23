@@ -6,15 +6,17 @@ if (postTa && postCounter) {
     });
 }
 
+
 function limitFiles(input, max) {
+    const preview = document.getElementById('post-media-preview');
+    preview.innerHTML = '';
+
     if (input.files.length > max) {
         alert(`Max ${max} images allowed.`);
         input.value = '';
-        document.getElementById('post-media-preview').innerHTML = '';
         return;
     }
-    const preview = document.getElementById('post-media-preview');
-    preview.innerHTML = '';
+
     Array.from(input.files).forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
@@ -26,3 +28,5 @@ function limitFiles(input, max) {
         reader.readAsDataURL(file);
     });
 }
+
+

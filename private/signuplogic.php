@@ -78,9 +78,9 @@ $data = array($user);
 $stmt->execute($data);
 $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
-$sql = "INSERT INTO userprofiles (UserId,Nickname,Description,ProfilePicture) VALUES (?,?,?,?)";
+$sql = "INSERT INTO userprofiles (UserId,Nickname,Description,ProfilePicture,Banner) VALUES (?,?,?,?,?)";
 $stmt = $dbconn->prepare($sql);
-$data = array($res["id"], $user,"","Images/Skärmbild 2026-03-09 142605.png");
+$data = array($res["id"], $user,"","temp-pfp.png","temp-banner.png");
 $stmt->execute($data);
 
 $sql = "INSERT INTO usersettings (UserId) VALUES (?)";

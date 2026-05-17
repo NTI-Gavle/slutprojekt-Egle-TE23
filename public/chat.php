@@ -152,7 +152,7 @@ $following = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 <?php endforeach; ?>
                 <?php if (empty($messages)): ?>
-                    <p style="text-align:center;opacity:0.6">Say hello!</p>
+                    <p style="text-align:center;">Say hello!</p>
                 <?php endif; ?>
             </div>
 

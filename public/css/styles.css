@@ -23,7 +23,7 @@ html.darkmode, body.darkmode {
     --primary-text-color: #fff;
     --secondary-text-color: #fff;
     --post-text-color: #fff;
-    --text-midtone-color: #fff;
+    --text-midtone-color: #889aff;
     --accent-color: #dee1ff;
     --border-color: #8bb5ff;
 
@@ -415,28 +415,29 @@ h1,h2,h3,h4,p
     border-radius: 10px;
     border: 2px solid var(--border-color);
 }
-#create-post-popout{
-    background-color: rgba(0,0,0, 0.5);
-    width: 100vw;
-    height: 100vh;
-    top:0;
-    position:fixed;
-    /*display: flex;*/
+/*create post popout*/
+#create-post-popout {
+    background-color: rgba(0,0,0,0.5);
+    width: 100vw; height: 100vh;
+    top: 0; position: fixed;
     display: none;
     align-items: center;
-    z-index: 10;
+    z-index: 200;
 }
-.create-post-container{
-    margin: 0px auto;
-    width: 60%;
+.create-post-container {
+    margin: 0 auto;
+    width: min(90vw, 600px);
 }
-#create-post-text{
-    resize: none;
-    border: none;
+#create-post-text { resize: none; border: none; }
+#create-post-text::placeholder { color: var(--text-midtone-color); }
+ 
+.post-media-preview { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0; }
+.media-preview-thumb {
+    width: 80px; height: 80px;
+    object-fit: cover; border-radius: 10px;
+    border: 2px solid var(--border-color);
 }
-#create-post-text::placeholder{
-    color: var(--text-midtone-color);
-}
+ 
 
 .media-grid {
     display: grid;
@@ -771,6 +772,7 @@ h1,h2,h3,h4,p
     border-radius: 20px;
 }
 .post-username{
+    color: var(--post-text-color);
     font-size:x-large;
     margin:auto 0px;
 }
@@ -1230,7 +1232,7 @@ h1,h2,h3,h4,p
     opacity: 1; 
 }
  
-/*General*/
+/*General*/ 
 .p-container{
     background-color: var(--primary-color);
     color: var(--post-text-color);

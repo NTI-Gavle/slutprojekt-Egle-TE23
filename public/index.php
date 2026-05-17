@@ -4,7 +4,7 @@ require_once __DIR__ . '/../includes/header.php';
 include('../private/dbconnection.php');
 require_once('../includes/functions.php');
 
-$feed = $_GET['feed'] ?? 'discover';
+$feed     = $_GET['feed'] ?? 'discover';
 $loggedIn = isset($_SESSION['user_id']);
 
 switch ($feed) {
@@ -95,8 +95,7 @@ if ($loggedIn && !empty($posts)) {
 //top comment
 $topComments    = [];
 $commentCounts  = [];
-if (!empty($posts)) 
-    {
+if (!empty($posts)) {
     $postIds      = array_column($posts, 'id');
     $placeholders = implode(',', array_fill(0, count($postIds), '?'));
 
@@ -175,6 +174,17 @@ if (!empty($posts))
 </div>
 <?php endif; ?>
 
+<!--lightbox-->
+<div id="lightbox" style="display:none" class="modal-overlay" onclick="if(event.target===this)closeLightbox()">
+    <div class="lightbox-box">
+        <button class="lightbox-btn lightbox-prev" onclick="lightboxStep(-1)">&#8249;</button>
+        <img id="lightbox-img" src="" alt="full size" style="max-width:90vw;max-height:85vh;border-radius:10px;object-fit:contain">
+        <button class="lightbox-btn lightbox-next" onclick="lightboxStep(1)">&#8250;</button>
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    </div>
+</div>
+<script defer src="js/lightbox.js"></script>
+
 <div class="feed-container">
     <?php require_once __DIR__ . '/../includes/feednav.php'; ?>
     <div class="feed">
@@ -196,5 +206,6 @@ if (!empty($posts))
     </div>
     <?php require_once __DIR__ . '/../includes/sitenav.php'; ?>
 </div>
+
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

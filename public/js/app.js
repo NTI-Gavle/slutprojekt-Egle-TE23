@@ -54,34 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
         update();
     });
 
-    //media
-    const mediaInput   = document.getElementById('post-media-input');
-    const mediaPreview = document.getElementById('post-media-preview');
-    if (mediaInput && mediaPreview) {
-        mediaInput.addEventListener('change', () => {
-            mediaPreview.innerHTML = '';
-            Array.from(mediaInput.files).slice(0, 4).forEach((file, i) => {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const wrap = document.createElement('div');
-                    wrap.className = 'media-preview-item';
-                    wrap.style.cssText = 'position:relative;display:inline-block';
-                    wrap.innerHTML = `
-                        <img src="${e.target.result}" class="media-preview-thumb" alt="preview">
-                        <button type="button" class="media-remove-btn" data-index="${i}"
-                            style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:0.7em">✕</button>`;
-                    mediaPreview.appendChild(wrap);
-                };
-                reader.readAsDataURL(file);
-            });
-        });
-        mediaPreview.addEventListener('click', e => {
-            if (e.target.classList.contains('media-remove-btn')) {
-                e.target.closest('.media-preview-item').remove();
-            }
-        });
-    }
-
     //text or media
     const postForm = document.querySelector('#create-post-popout form');
     if (postForm) {

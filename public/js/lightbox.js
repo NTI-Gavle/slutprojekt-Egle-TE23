@@ -25,7 +25,8 @@ function lightboxStep(dir) {
     lbIndex = (lbIndex + dir + lbImages.length) % lbImages.length;
     openLightbox();
 }
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', e => 
+{
     const lb = document.getElementById('lightbox');
     if (!lb || lb.style.display !== 'flex') return;
     if (e.key === 'ArrowRight') lightboxStep(1);
