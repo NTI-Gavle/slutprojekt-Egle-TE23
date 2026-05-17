@@ -7,6 +7,7 @@
         <?php else:?>
         <a href="logout.php" class="link-p" onclick="return confirm('Are you sure you want to log out?')">Logout</a>
         <?php endif;?>
+        | <a href="GDPR.php" class="link-p">Privacy</a> 
     </p>
 </footer>
 </body>
