@@ -1,6 +1,9 @@
 <?php
+//contact page for users to send emails with complaints or requests
+
 $pageTitle = "Contact";
 require_once __DIR__ . '/../includes/header.php';
+include '../private/sendmail.php'; 
 
 // Initialize variables
 $name = $email = $message = '';
@@ -13,54 +16,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $message = trim($_POST['message'] ?? '');
 
-    // Basic validation
-    if (empty($name)) {
+    if (empty($name))                                          
         $errors[] = "Name is required.";
-    }
-    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) 
         $errors[] = "A valid email is required.";
-    }
-    if (empty($message)) {
+    if (empty($message))                                       
         $errors[] = "Message cannot be empty.";
-    }
+    if (strlen($message) > 2000)                               
+        $errors[] = "Message is too long (max 2000 characters).";
 
-    // If no errors, you can send email or save to DB
     if (!$errors) {
-        // Example: send email (requires proper mail setup)
-        // mail("you@example.com", "Contact Form Message from $name", $message, "From:$email");
-
-        $success = true;
-        $name = $email = $message = ''; // clear form
+        $body = "
+            <h2>Contact Form Message</h2>
+            <p><strong>From:</strong> " . htmlspecialchars($name) . " &lt;" . htmlspecialchars($email) . "&gt;</p>
+            <hr>
+            <p>" . nl2br(htmlspecialchars($message)) . "</p>
+        ";
+        $result = sendMail( 'egle20161130@gmail.com', "LO-GO Contact: " . $name,  $body, strip_tags($message));
+        
+        if ($result['success']) {
+            $success = true;
+            $name = $email = $message = '';
+        } 
+        else {
+            $errors[] = "Failed to send message. Please try again later.";
+        }
     }
 }
 ?>
 
-<h2>Contact Us</h2>
+<div class="post-container m-5">
 
-<?php if ($success): ?>
-    <p class="success-message">Thank you! Your message has been sent.</p>
-<?php endif; ?>
+    <form action="contact.php" method="post">
+        <div class="p-header">
+            <h1>CONTACT ME!</h1>
+        </div>
+        <div class="p-content">
+            <?php if ($success): ?>
+            <div class="alert alert-success">Message sent! I might get back to you soon.</div>
+            <?php endif; ?>
 
-<?php if ($errors): ?>
-    <ul class="error-messages">
-        <?php foreach ($errors as $error): ?>
-            <li><?= htmlspecialchars($error) ?></li>
-        <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
+            <?php if (!empty($errors)): ?>
+            <div style="background:rgba(255,0,0,0.1);border-radius:10px;padding:10px">
+                <?php foreach ($errors as $err): ?>
+                <p style="color:red; margin:4px 0px">✕ <?= htmlspecialchars($err) ?></p>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
 
-<form action="contact.php" method="post" class="contact-form">
-    <label for="name">Name:</label>
-    <input type="text" name="name" id="name" value="<?= htmlspecialchars($name) ?>">
+            <form action="contact.php" method="post" class="p-form">
+                <div class="form-group">
+                    <label class="settings-label">Name</label>
+                    <input class="form-control" type="text" name="name" placeholder="Your name"
+                        value="<?= htmlspecialchars($name) ?>" maxlength="100">
 
-    <label for="email">Email:</label>
-    <input type="email" name="email" id="email" value="<?= htmlspecialchars($email) ?>">
+                </div>
+                <div class="form-group">
+                    <label class="settings-label">Email</label>
+                        <input class="form-control" type="email" name="email" placeholder="your@email.com"
+                            value="<?= htmlspecialchars($email) ?>">
+                    
+                </div>
+                <div class="form-group">
+                    <label class="settings-label">Message  </label>
+                        <textarea class="form-control" name="message" placeholder="Write your message here..." rows="5"
+                            maxlength="2000" style="resize:vertical"><?= htmlspecialchars($message) ?></textarea>
+                  
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-secondary">&ltsend message&gt</button>
+                </div>
 
-    <label for="message">Message:</label>
-    <textarea name="message" id="message"><?= htmlspecialchars($message) ?></textarea>
-
-    <button type="submit">Send</button>
-</form>
+        </div>
+    </form>
+</div>
 
 <?php
 require_once __DIR__ . '/../includes/footer.php';
