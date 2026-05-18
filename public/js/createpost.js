@@ -6,7 +6,7 @@ if (postTa && postCounter) {
     });
 }
 
-
+                                                            
 function limitFiles(input, max) {
     const preview = document.getElementById('post-media-preview');
     preview.innerHTML = '';

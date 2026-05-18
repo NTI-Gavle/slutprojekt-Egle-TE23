@@ -11,7 +11,7 @@ $user = $stmt->fetch();
 
 if (!$user) {
     $_SESSION['reset_msg'] = "A user with that email address does not exist.";
-    header("Location: reset-password.php");
+    header("Location: ../public/reset-password.php");
     exit;
 }
 
