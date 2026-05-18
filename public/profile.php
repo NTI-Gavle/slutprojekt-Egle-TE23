@@ -1,4 +1,5 @@
 <?php
+//Displays a users profile
 $pageTitle = "Profile";
 require_once __DIR__ . '/../includes/header.php';
 require_once('../private/dbconnection.php');

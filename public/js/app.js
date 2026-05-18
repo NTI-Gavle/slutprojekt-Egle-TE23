@@ -1,3 +1,5 @@
+//general funktions used throughout the website
+
 window.onscroll = function () { scrollFunction(); };
 function scrollFunction() {
     const header = document.querySelector("header");

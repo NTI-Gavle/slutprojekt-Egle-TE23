@@ -1,3 +1,5 @@
+//For settings page, setts cookies and manages preview images for banner and pfp.
+
 function ShowSettings(id) {
     document.querySelectorAll('.settings-section').forEach(el => {
         el.style.display = 'none';
@@ -42,7 +44,7 @@ if (animBgToggle) {
         }
     });
 }
-
+//pfp and banner preview
 function previewImage(input, previewId) {
     if (!input.files || !input.files[0]) return;
     const reader = new FileReader();

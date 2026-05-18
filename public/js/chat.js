@@ -1,3 +1,5 @@
+//For chat page, automatically scrolls down to last message and manages ajax for new messages.
+
 //scroll to bottom
 const chatMessages = document.getElementById('chat-messages');
 if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;

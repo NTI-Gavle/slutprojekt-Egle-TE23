@@ -1,4 +1,8 @@
 <?php
+//Chat page where a logged in user can chat with other users.
+//user can add and delete conversations
+//messages are loaded with ajax
+
 $pageTitle = "Chat";
 require_once __DIR__ . '/../includes/header.php';
 require_once('../private/dbconnection.php');

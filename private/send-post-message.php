@@ -18,7 +18,7 @@ if (!$receiverId || !$postId) {
 }
 
 //find chat, if none create
-$stmt = $dbconn->prepare("SELECT Id FROM conversations 
+$stmt = $dbconn->prepare("SELECT id FROM conversations 
     WHERE (UserId = ? AND ContactUserId = ?) 
     OR (UserId = ? AND ContactUserId = ?) LIMIT 1 ");
 $stmt->execute([$senderId, $receiverId, $receiverId, $senderId]);
@@ -33,7 +33,7 @@ if ($conv) {
 }
 
 //send message
-$postUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/public/post.php?id=' . $postId;
+$postUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/SLUTPROJEKT%20WEB/slutprojekt-Egle-TE23/public/post.php?id=' . $postId;
 $text = "Shared a post: " . $postUrl;
 $stmt = $dbconn->prepare("INSERT INTO messages (ConversationId, SenderId, ReceiverId, Text, TimeSent) VALUES (?, ?, ?, ?, NOW())");
 $stmt->execute([$convId, $senderId, $receiverId, $text]);

@@ -1,12 +1,7 @@
 <?php
-/**
- * functions.php
- * Shared helper functions used across the public-facing pages.
- *
- * Functions:
- *  renderPostCard()  Renders a full post card with actions.
- *  isAdmin() Returns true if the current session user is an admin.
- */
+//General funktions that sre used on multiple pages
+//Functions: Create post & check if user admin
+
 function renderPostCard( 
     array $post, array $mediaFiles = [], ?array $topComment = null, 
     int $commentCount = 0, bool $loggedIn = false, array $starredIds = []

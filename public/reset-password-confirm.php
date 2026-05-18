@@ -19,7 +19,7 @@ if (!$user["id"]) {
     header("Location: ../public/login.php");
     exit;
 }
-$pageTitle = "Home"; // <-- set dynamic page title
+$pageTitle = "Reset Password Confirm";
 require_once __DIR__ . '/../includes/header.php';
 ?>
 

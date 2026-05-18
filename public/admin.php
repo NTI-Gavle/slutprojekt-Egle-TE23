@@ -1,10 +1,6 @@
 <?php
-/**
- * admin.php
- * Administration panel — only accessible to users with IsAdmin = 1.
- * Allows admins to manage users (ban, unban, promote, delete) and
- * moderate content (delete posts and comments).
- */
+//Administration panel, only accessible to users with IsAdmin = 1.
+// Allows admins to manage users (ban, unban, promote, delete) and moderate content (delete posts and comments).
 
 $pageTitle = "Admin";
 require_once __DIR__ . '/../includes/header.php';

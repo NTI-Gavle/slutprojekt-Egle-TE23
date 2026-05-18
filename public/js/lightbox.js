@@ -1,3 +1,5 @@
+//for image display when you lick on an image in a post
+
 let lbImages = [], lbIndex = 0;
 
 function initLightbox() {

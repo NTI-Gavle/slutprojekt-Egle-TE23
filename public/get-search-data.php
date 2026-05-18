@@ -1,4 +1,6 @@
 <?php
+//used by header to get search data
+
 session_start();
 require_once '../private/dbconnection.php';
 header('Content-Type: application/json');

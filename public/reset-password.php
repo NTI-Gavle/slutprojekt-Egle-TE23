@@ -1,4 +1,5 @@
 <?php
+//Start reset password, send a mail via reset password logic
 include '../private/dbconnection.php';
 session_start();
 

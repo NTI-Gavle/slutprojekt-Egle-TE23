@@ -6,7 +6,7 @@ if (isset($_SESSION["signupError"])) {
     $errorMessage = $_SESSION["signupError"];
     unset($_SESSION["signupError"]);
 }
-$pageTitle = "Home"; // <-- set dynamic page title
+$pageTitle = "Signup";
 require_once __DIR__ . '/../includes/header.php';
 ?>
 

@@ -1,8 +1,5 @@
 <?php
-/**
- * post.php
- * Displays a single post in full detail
- */
+// Displays a single post in full detail
 
 $pageTitle = "Post";
 require_once __DIR__ . '/../includes/header.php';

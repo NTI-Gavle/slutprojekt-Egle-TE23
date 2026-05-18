@@ -1,3 +1,5 @@
+//For new post, limits images and manages char counter
+
 const postTa = document.getElementById('create-post-text');
 const postCounter = document.getElementById('post-char-counter');
 if (postTa && postCounter) {
@@ -6,7 +8,7 @@ if (postTa && postCounter) {
     });
 }
 
-                                                            
+
 function limitFiles(input, max) {
     const preview = document.getElementById('post-media-preview');
     preview.innerHTML = '';

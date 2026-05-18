@@ -1,3 +1,4 @@
+//for header searchbar
 
 document.addEventListener('click', e => {
     if (!document.getElementById('search-wrapper').contains(e.target)) {

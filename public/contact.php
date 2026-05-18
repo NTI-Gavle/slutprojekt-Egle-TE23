@@ -1,4 +1,6 @@
 <?php
+//contact page for users to send emails with complaints or requests
+
 $pageTitle = "Contact";
 require_once __DIR__ . '/../includes/header.php';
 include '../private/sendmail.php'; 

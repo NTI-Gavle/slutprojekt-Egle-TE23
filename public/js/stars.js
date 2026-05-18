@@ -1,6 +1,8 @@
 //stolen from https://dev.to/usman_awan/how-i-built-a-grok-inspired-starfield-shooting-stars-using-html-canvas-3872
 //modofied but mostly stolen
 
+//everything for the background animation, can be turned off via settings
+
 //cookies
 function getCookie(name) {
     const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));

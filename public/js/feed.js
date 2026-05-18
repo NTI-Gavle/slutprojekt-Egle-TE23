@@ -1,3 +1,5 @@
+//for post actions, manages ajax för like dislike and star
+
 document.addEventListener("click", async (e) => {
     const post = e.target.closest(".post-card, .post-container");
     if (!post) return;
@@ -55,7 +57,8 @@ document.addEventListener("click", async (e) => {
         const data = await res.json();
         if (!data.length) {
             commentsList.innerHTML = "<p style='opacity:0.6;text-align:center;padding:10px'>No comments yet.</p>";
-        } else {
+        } 
+        else {
             commentsList.innerHTML = data.map((c, i) => `
                 <div class="comment-thread-item">
                     <div class="comment-thread-avatar">
@@ -78,38 +81,69 @@ document.addEventListener("click", async (e) => {
     //share
     if (shareBtn) {
         const sendPopout = document.getElementById("send-popout");
-        if (!sendPopout) {
-            const url = window.location.origin + "/public/post.php?id=" + postId;
-            navigator.clipboard?.writeText(url);
-            return;
-        }
+        if (!sendPopout) return;
         sendPopout.dataset.postId = postId;
         sendPopout.style.display = "flex";
-
-        const copyBtn = document.getElementById("copy-link-btn");
-        if (copyBtn) {
-            copyBtn.onclick = () => {
-                const url = window.location.origin + "/public/post.php?id=" + postId;
-                navigator.clipboard.writeText(url).then(() => {
-                    const confirm = document.getElementById("copy-confirm");
-                    if (confirm) { confirm.style.display = "inline"; setTimeout(() => confirm.style.display = "none", 2000); }
-                });
-            };
-        }
-        document.querySelectorAll(".send-to-user-btn").forEach(btn => {
-            btn.onclick = async () => {
-                const receiverId = btn.dataset.userId;
+        bindSendPopout(postId);
+        return;
+    }
+});
+ 
+function bindSendPopout(postId) {
+    const copyBtn = document.getElementById("copy-link-btn");
+    if (copyBtn) {
+        const fresh = copyBtn.cloneNode(true);
+        copyBtn.parentNode.replaceChild(fresh, copyBtn);
+        fresh.addEventListener("click", () => {
+            const url = window.location.origin + "/SLUTPROJEKT%20WEB/slutprojekt-Egle-TE23/public/post.php?id=" + postId;
+            if (navigator.clipboard) 
+            {
+                navigator.clipboard.writeText(url).then(() => showCopyConfirm());
+            } 
+            else {
+                const ta = document.createElement("textarea");
+                ta.value = url;
+                ta.style.position = "fixed";
+                ta.style.opacity = "0";
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand("copy");
+                document.body.removeChild(ta);
+                showCopyConfirm();
+            }
+        });
+    }
+ 
+    document.querySelectorAll(".send-to-user-btn").forEach(btn => {
+        const fresh = btn.cloneNode(true);
+        btn.parentNode.replaceChild(fresh, btn);
+        fresh.addEventListener("click", async () => {
+            const receiverId = fresh.dataset.userId;
+            fresh.textContent = "Sending...";
+            fresh.disabled = true;
+            try {
                 const res = await fetch("../private/send-post-message.php", {
                     method: "POST",
                     body: new URLSearchParams({ post_id: postId, receiver_id: receiverId })
                 });
                 const data = await res.json();
-                if (data.ok) { btn.textContent = "✓ Sent!"; btn.disabled = true; }
-            };
+                fresh.textContent = data.ok ? "< Sent! >" : "< Error >";
+                if (!data.ok) fresh.disabled = false;
+            } catch {
+                fresh.textContent = "< Error >";
+                fresh.disabled = false;
+            }
         });
-        return;
-    }
-});
+    });
+}
+ 
+function showCopyConfirm() {
+    const confirm = document.getElementById("copy-confirm");
+    if (!confirm) return;
+    confirm.style.display = "inline";
+    setTimeout(() => confirm.style.display = "none", 2000);
+}
+ 
 
 //views
 if ('IntersectionObserver' in window) {

@@ -1,4 +1,6 @@
 <?php
+//login page
+
 session_start();
 
 $errorMessage = "";

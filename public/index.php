@@ -1,4 +1,6 @@
 <?php
+//main page, shows different post feeds.
+
 $pageTitle = "Home";
 require_once __DIR__ . '/../includes/header.php';
 include('../private/dbconnection.php');
@@ -164,7 +166,7 @@ if (!empty($posts)) {
                     <span><?= htmlspecialchars($f['Nickname']) ?></span>
                     <button class="btn btn-secondary btn-sm send-to-user-btn" data-user-id="<?= $f['id'] ?>">&ltsend&gt</button>
                 </div>
-                <?php endforeach; ?>
+                <?php endforeach; ?>    
             </div>
             <?php else: ?>
             <p style="text-align:center;opacity:0.6">Follow people to send them posts!</p>
