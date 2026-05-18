@@ -20,7 +20,6 @@ if (!in_array($tab, $allowed)) {
     $tab = 'account';
 }
 
-
 $stmt = $dbconn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$userId]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -28,11 +27,13 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 $stmt = $dbconn->prepare("SELECT * FROM userprofiles WHERE UserId = ?");
 $stmt->execute([$userId]);
 $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-//errs
+
+//delete-account.php errors
+$deleteError = $_SESSION['delete_account_error'] ?? '';
+unset($_SESSION['delete_account_error']);
+
 $settingsErrors = $_SESSION['settings_errors'] ?? [];
 unset($_SESSION['settings_errors']);
- 
-//defult cookies
 $animatedBgOn = !isset($_COOKIE['animated-bg']) || $_COOKIE['animated-bg'] === 'true';
 $darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
 ?>
@@ -67,7 +68,7 @@ $darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
             <form method="POST" action="../private/settings_update.php" enctype="multipart/form-data" class="settings-form">
                 <input type="hidden" name="csrf" value="<?= $_SESSION['csrf'] ?>">
 
-                <!--pfp-->
+                <!--pfp and banner-->
                 <div class="settings-image-row">
                     <div class="settings-image-group">
                         <label class="settings-label">Profile picture</label>
@@ -131,6 +132,31 @@ $darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
                     Save changes
                 </button>
             </form>
+
+            <!--delete account area-->
+            <div class="settings-section-title" style="margin-top:24px;border-color:#e74c3c;color:#e74c3c">
+                Delete Account
+            </div>
+
+            <?php if ($deleteError): ?>
+            <div style="background:rgba(231,76,60,0.12);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:10px 16px;color:#c0392b;font-size:0.88em">
+                ✕ <?= htmlspecialchars($deleteError) ?>
+            </div>
+            <?php endif; ?>
+
+            <div style="background:rgba(231,76,60,0.07);border:2px solid rgba(231,76,60,0.3);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px">
+                <div>
+                    <strong style="color:#e74c3c">Delete account</strong>
+                    <p style="font-size:0.85em;opacity:0.7;margin:4px 0 0">
+                        This permanently deletes your account, all your posts, comments, messages, and media. This action cannot be undone.
+                    </p>
+                </div>
+                <button type="button" class="btn btn-sm"
+                    style="background:#e74c3c;color:#fff;border:none;border-radius:20px;width:fit-content;cursor:pointer"
+                    onclick="document.getElementById('delete-account-modal').style.display='flex'">
+                    <i class="fa-solid fa-trash"></i> Delete my account
+                </button>
+            </div>
         </div>
 
         <!--general-->
@@ -149,7 +175,7 @@ $darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
             <div class="settings-toggle-row">
                 <div>
                     <strong>Animated star background</strong>
-                    <p style="opacity:0.6;font-size:0.85em;margin:0">Show the background aniation.</p>
+                    <p style="opacity:0.6;font-size:0.85em;margin:0">Show the background animation.</p>
                 </div>
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="animated-bg-toggle"
@@ -158,14 +184,52 @@ $darkmodeOn = !empty($_COOKIE['darkmode']) && $_COOKIE['darkmode'] === 'false';
             </div>
         </div>
         <!--about-->
-      <div id="about" class="settings-section" style="<?= $tab === 'about' ? 'display:flex' : 'display:none' ?>">
+        <div id="about" class="settings-section" style="<?= $tab === 'about' ? 'display:flex' : 'display:none' ?>">
             <h2>About LO-GO</h2>
             <p>I made this awesome super cool website! 
             <br>If you want to contact me there's a button bellow, press it!</p>
-            <p style="opacity:0.6; font-size:0.85em">Version 1.75.1 &bull; Made by Me</p>
+            <p style="opacity:0.6;font-size:0.85em">Version 1.75.1 &bull; Made by Me</p>
             <a href="contact.php" class="btn btn-secondary btn-sm" style="margin-top:10px">&ltcontact&gt</a>
         </div>
 
     </div>
 </div>
+
+<!--delete account-->
+<div id="delete-account-modal" style="display:none" class="modal-overlay"
+     onclick="if(event.target===this)this.style.display='none'">
+    <div class="p-container modal-box">
+        <div class="p-header" style="background:#e74c3c">
+            <span class="post-username" style="color:#fff">Delete account</span>
+            <button class="btn btn-icon" style="color:#fff"
+                    onclick="document.getElementById('delete-account-modal').style.display='none'">✕</button>
+        </div>
+        <div class="p-content">
+            <p style="color:var(--post-text-color)">
+                You're about to permanently delete <strong><?= htmlspecialchars($user['Username']) ?></strong> and all associated data. This cannot be undone.
+            </p>
+            <form method="POST" action="../private/delete-account.php"
+                  onsubmit="return document.getElementById('da-pass').value !== ''">
+                <input type="hidden" name="csrf" value="<?= $_SESSION['csrf'] ?>">
+                <label class="settings-label" style="color:var(--post-text-color)">
+                    Confirm your password
+                    <input type="password" id="da-pass" name="confirm_password"
+                           class="form-control" placeholder="Your current password"
+                           required autocomplete="current-password">
+                </label>
+                <div style="display:flex;gap:10px;margin-top:14px">
+                    <button type="button" class="btn btn-secondary btn-sm btn-pill"
+                            onclick="document.getElementById('delete-account-modal').style.display='none'">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-pill"
+                            style="background:#e74c3c;color:#fff;border:none;cursor:pointer">
+                        <i class="fa-solid fa-trash"></i> Yes, delete everything
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
